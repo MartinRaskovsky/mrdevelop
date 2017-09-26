@@ -83,3 +83,7 @@ group :test do
   gem 'launchy'
   gem 'selenium-webdriver'
 end
+
+gem 'json'#, '~> 1.8.1'
+#gem 'json', '= 1.7.6'
+gem 'json_pure', '=1.8.0', require: false
