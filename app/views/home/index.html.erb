@@ -1,0 +1,37 @@
+<% content_for :javascript do %>
+  <script type="text/javascript">
+    ShopifyApp.ready(function(){
+      ShopifyApp.Bar.initialize({ title: "Home" });
+    });
+  </script>
+<% end %>
+<link href="//cdn.shopify.com/s/files/1/2340/3057/t/1/assets/theme.scss.css?10548409062771369169" rel="stylesheet" type="text/css" media="all" />
+<style type="text/css">html {  padding-top:100px; padding-left:100px; } body { position:relative;} </style>
+
+<%= render 'layouts/navigation.html' %>
+<h2>Products</h2>
+
+<ul>
+  <% @products.each do |product| %>
+    <li><%= link_to product.title, "https://#{@shop_session.url}/admin/products/#{product.id}", target: "_top" %></li>
+  <% end %>
+</ul>
+
+<hr>
+
+<h2>Returning Clients</h2>
+  <% @tagged_emails.each do |email| %>                                                                                         
+    <li><%= link_to email, "mailto:" + email %></li>
+  <% end %>
+</ul>
+
+<hr>
+
+<% if @webhooks.present? %>
+  <h2>Webhooks</h2>
+  <ul>
+    <% @webhooks.each do |webhook| %>
+      <li><%= webhook.topic %> : <%= webhook.address %></li>
+    <% end %>
+  </ul>
+<% end %>
