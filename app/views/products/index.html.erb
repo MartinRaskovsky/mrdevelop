@@ -1,0 +1,23 @@
+<h1>Products</h1>
+
+<center>
+  <% @types.each do |key, block| %>
+  <h4><%= key %></h4>
+    <table border="1">
+    <tr>
+      <td>ID</td>
+      <td>IMAGE</td>
+      <td>#Variants</td>
+    </tr>
+    <% block.each do |product| %>
+      <% id = product['id'] %>
+      <% img = product['image'] %>
+      <tr align=center>
+        <td><%= id %></td>
+        <td><%= link_to image_tag("#{img}"), {:controller => "product", :action => "index", :id => id.to_s} %></td>
+        <td><%= product['variant_count'] %></td>
+      </tr>
+    <% end %>
+    </table>
+  <% end %>
+</center>
