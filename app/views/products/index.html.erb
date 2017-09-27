@@ -3,21 +3,21 @@
 <center>
   <% @types.each do |key, block| %>
   <h4><%= key %></h4>
-    <table border="1">
-    <tr>
-      <td>ID</td>
-      <td>IMAGE</td>
-      <td>#Variants</td>
-    </tr>
-    <% block.each do |product| %>
+    <table>
+    <% block.length.times do |i| %>
+      <% product = block[i] %>
       <% id = product['id'] %>
       <% img = product['image'] %>
-      <tr align=center>
-        <td><%= id %></td>
-        <td><%= link_to image_tag("#{img}"), {:controller => "product", :action => "index", :id => id.to_s} %></td>
-        <td><%= product['variant_count'] %></td>
+      <% if i % 4 == 0 %>
+        <% if i > 0 %>
       </tr>
+        <% end %>
+
+      <tr align=center>
+      <% end %>
+        <td><%= link_to image_tag("#{img}"), {:controller => "product", :action => "index", :id => id.to_s} %></td>
     <% end %>
+      </tr>
     </table>
   <% end %>
 </center>
