@@ -1,0 +1,24 @@
+<center>                                                                                                                     
+<h3>Images</h3>                                                                                                               
+  <table>
+  <% @images.length.times do |i| %>
+    <% img = @images[i].image %>
+    <% if i % 8 == 0 %>
+      <% if i > 0 %>
+    </tr>
+      <% end %>
+
+    <tr align=center>
+    <% end %>
+      <!--%= link_to(image_tag(img.thumb.url, alt: 'Image'), img.url, target: '_blank') if img? %-->
+      <td><%= image_tag("#{img}", {:width => "64"}) %></td>
+  <% end %>
+    </tr>
+  </table>
+
+<h3>Upload</h3>
+
+<% @image = Image.new %>
+<%= render 'form', image: @image %>
+
+</center>
