@@ -1,0 +1,7 @@
+<%= form_for image do |f| %>
+  <%= f.collection_radio_buttons(:name, @images, :image, :name) do |b|
+  b.label { b.radio_button + image_tag(b.object.image.medium) }
+  end %>
+  <br>
+  <%= f.submit "Generate Mockup" %>
+<% end %>

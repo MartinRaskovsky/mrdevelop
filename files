@@ -18,7 +18,6 @@
 ./app/assets/stylesheets/products.scss
 ./app/channels/application_cable/channel.rb
 ./app/channels/application_cable/connection.rb
-./app/controllers/.product_controller.rb.swp
 ./app/controllers/application_controller.rb
 ./app/controllers/concerns/.keep
 ./app/controllers/home_controller.rb
@@ -58,7 +57,9 @@
 ./app/views/layouts/mailer.html.erb
 ./app/views/layouts/mailer.text.erb
 ./app/views/pages/about.html.erb
+./app/views/product/.index.html.erb.swp
 ./app/views/product/_form.html.erb
+./app/views/product/_images_form.html.erb
 ./app/views/product/index.html.erb
 ./app/views/products/index.html.erb
 ./app/views/users/_user.html.erb
@@ -97,7 +98,6 @@
 ./files
 ./Gemfile
 ./Gemfile.lock
-./images.txt
 ./lib/assets/.keep
 ./lib/tasks/.keep
 ./package.json
@@ -125,6 +125,14 @@
 ./public/uploads/image/image/4/large_a4.jpg
 ./public/uploads/image/image/4/medium_a4.jpg
 ./public/uploads/image/image/4/thumb_a4.jpg
+./public/uploads/image/image/6/large_Peace_And_Tranquility_DSC_0670.jpg
+./public/uploads/image/image/6/medium_Peace_And_Tranquility_DSC_0670.jpg
+./public/uploads/image/image/6/Peace_And_Tranquility_DSC_0670.jpg
+./public/uploads/image/image/6/thumb_Peace_And_Tranquility_DSC_0670.jpg
+./public/uploads/image/image/7/Cat_In_The_Web_DSC_1139Web.jpg
+./public/uploads/image/image/7/large_Cat_In_The_Web_DSC_1139Web.jpg
+./public/uploads/image/image/7/medium_Cat_In_The_Web_DSC_1139Web.jpg
+./public/uploads/image/image/7/thumb_Cat_In_The_Web_DSC_1139Web.jpg
 ./Rakefile
 ./README
 ./README.md
@@ -133,4 +141,3 @@
 ./vendor/.keep
 ./vendor/assets/javascripts/.keep
 ./vendor/assets/stylesheets/.keep
-./x

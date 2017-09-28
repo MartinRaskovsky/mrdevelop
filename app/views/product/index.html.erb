@@ -23,28 +23,29 @@
     <li><b>< %= key %></b> < %= value %></li>
   < % end %-->
 
-<h3>Images</h3>                                                                                                               
-  <table>
-  <% @images.length.times do |i| %>
-    <% img = @images[i].image %>
-    <!--% bas = File.basename("#{img.url}", ".jpg") %-->
-    <% if i % 8 == 0 %>
-      <% if i > 0 %>
+<h3>Select one Image</h3>                                                                                                               
+  <!--table>
+  < % @images.length.times do |i| %>
+    < % img = @images[i].image %>
+    < % if i % 8 == 0 %>
+      < % if i > 0 %>
     </tr>
-      <% end %>
+      < % end %>
 
     <tr align=center>
-    <% end %>
+    < % end %>
       <td>
-        <%= link_to(image_tag("#{img.thumb.url}", {:width => "64", :alt => "Image"}), "#{img.url}", target: '_blank') %>
+        < %= link_to(image_tag("#{img.thumb.url}", {:width => "64", :alt => "Image"}), "#{img.url}", target: '_blank') %>
       </td>  
-  <% end %>
+  < % end %>
     </tr>
-  </table>
+  </table-->
+
+<% @image = Image.new %>
+<%= render 'images_form', image: @image %>
 
 <h3>Upload</h3>
 
-<% @image = Image.new %>
 <%= render 'form', image: @image %>
 
 </center>

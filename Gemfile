@@ -91,3 +91,6 @@ gem 'json_pure', '=1.8.0', require: false
 gem "carrierwave"
 gem "mini_magick"
 gem "fog"
+
+gem 'binding_of_caller'
+
