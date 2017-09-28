@@ -1,6 +1,7 @@
 class ProductController < ApplicationController
   def index
-    @images = Image.order('created_at DESC') if !@images  
+    @images = Image.order('created_at DESC') if !@images
+    @design = params['image_id']
     @id = params['id'].to_i
     @product = nil
     content = open("https://api.printful.com/products").read

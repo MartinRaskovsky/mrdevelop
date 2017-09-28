@@ -3,5 +3,6 @@
   b.label { b.radio_button + image_tag(b.object.image.medium) }
   end %>
   <br>
-  <%= f.submit "Generate Mockup" %>
+  <input value="<%= params[:id] %>" type="hidden" name="product_id" id="product_id" />
+  <%= f.submit "Select Image" %>
 <% end %>

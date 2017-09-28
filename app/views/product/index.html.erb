@@ -1,21 +1,38 @@
 <center>
 <h3>Product</h3>
+<% if @product %>
   <% type  = @product['type'] %>
   <% brand = @product['brand'] %>
   <% model = @product['model'] %>
   <% image = @product['image'] %>
   <% files = @product['files'] %>
   <% descr = @product['description'] %>
-  <table>
-  <tr>
-    <td width=400>
+  <table class="product-mockup">
+  <tr class="product-mockup">
+    <td width=200 class="product-mockup">
       <%= brand %>
       <%= model %>
       <br><br><br><br>
       <i><%= descr %></i>
     </td>
-    <td>
+    <td class="product-mockup">
         <%= image_tag("#{image}") %>
+    </td>
+    <td class="product-mockup-sep">
+        +
+    </td>
+    <td  class="product-mockup">
+        <%if @design %>
+          <!--%= image_tag("https://duw6wk4ou1qt.cloudfront.net/files/v529/generator/91/Capri_Leggings_mockup_generator.png", width: "300", class: "over") %--> 
+          <%= image_tag("/leggings.png", class: "over", width: "300") %>
+        <% else %>
+          <%= image_tag("/leggings.png", width: "300") %>
+        <% end %>
+        <% if @design %>
+          <div id='crop-img'>
+            <%= image_tag("#{@design}", class: "under", width: "300") %>
+          </div>
+        <% end %>
     </td>
   </tr>
   </table>
@@ -23,7 +40,8 @@
     <li><b>< %= key %></b> < %= value %></li>
   < % end %-->
 
-<h3>Select one Image</h3>                                                                                                               
+<% if @images.length > 0 %>
+  <h3>Images</h3>                                                                                                               
   <!--table>
   < % @images.length.times do |i| %>
     < % img = @images[i].image %>
@@ -41,11 +59,17 @@
     </tr>
   </table-->
 
-<% @image = Image.new %>
-<%= render 'images_form', image: @image %>
+  <% @image = Image.new %>
+  <%= render 'images_form', image: @image %>
+<% end %>
 
 <h3>Upload</h3>
 
+<br>
+<% @image = Image.new %>
 <%= render 'form', image: @image %>
 
+<% else %>
+<br><br> There are no products, please go back and select one
+<% end %>
 </center>

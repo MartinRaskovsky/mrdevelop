@@ -8,6 +8,7 @@
     <!--%= f.label :image %-->
     <%= f.file_field :image %>
   </div>
- 
+
+  <input value="<%= params[:id] %>" type="hidden" name="product_id" id="product_id" /> 
   <%= f.submit "Upload Image" %>
 <% end %>
