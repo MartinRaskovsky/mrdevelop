@@ -27,6 +27,7 @@
   <table>
   <% @images.length.times do |i| %>
     <% img = @images[i].image %>
+    <!--% bas = File.basename("#{img.url}", ".jpg") %-->
     <% if i % 8 == 0 %>
       <% if i > 0 %>
     </tr>
@@ -34,7 +35,9 @@
 
     <tr align=center>
     <% end %>
-      <td><%= link_to(image_tag("#{img.thumb.url}", {:alt => "Image"}), "#{img.url}", target: '_blank') %></td>  
+      <td>
+        <%= link_to(image_tag("#{img.thumb.url}", {:width => "64", :alt => "Image"}), "#{img.url}", target: '_blank') %>
+      </td>  
   <% end %>
     </tr>
   </table>
