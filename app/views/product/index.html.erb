@@ -60,6 +60,7 @@
   </table-->
 
   <% @image = Image.new %>
+  <% @image.name = @images[@design_index].image %>
   <%= render 'images_form', image: @image %>
 <% end %>
 
