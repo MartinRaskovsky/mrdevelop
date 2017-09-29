@@ -1,3 +1,5 @@
+include FileNameHelper
+
 class ImagesController < ApplicationController
   before_action :set_image, only: [:show, :edit, :update]
  
@@ -48,24 +50,39 @@ class ImagesController < ApplicationController
 
   private
 
-  def select_image
+  def has_image
+    if params.has_key?(:image)
       image = params['image']
-      @file_name = image["name"]
-      @dir = File.dirname(@file_name)
-      @base = File.basename(@file_name)
-      @image_name  = @dir + "/" + "large_" + @base
-      url = { :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => @image_name }
-      redirect_to url
+      name = image["name"]
+      if name && name.length>0
+        return true
+      end
+    end
+    return false
+  end
+
+  def select_image
+    if has_image
+      image = params['image']
+      @image_name  = large_image_name(image["name"])
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => @image_name
+    else
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
+    end
   end
 
   def upload_image
+    if has_image
       @image = Image.new(image_params)
       if @image.save
-        url = { :controller => 'product', :action => 'index', :id => params["product_id"] }
-        redirect_to url
+        redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
       else
         render :new
       end
+    else
+      #url = { :controller => 'product', :action => 'index', :id => params["product_id"] }
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
+    end
   end
 
 end

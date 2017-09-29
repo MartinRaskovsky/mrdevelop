@@ -1,15 +1,12 @@
+include FileNameHelper
+
 class ProductController < ApplicationController
   def index
     @images = Image.order('created_at DESC') if !@images
     @design = params['image_id']
     @design_index = 0
     if @design
-      @dir = File.dirname(@design)
-      @base = File.basename(@design)
-      if @base.start_with?("large_")
-        @base = @base[6, @base.length]
-      end
-      @name = @dir + "/" + @base
+      @name = base_image_name(@design)
       @images.each_with_index {|img,i|
         if img.image.to_s == @name
           @design_index = i
