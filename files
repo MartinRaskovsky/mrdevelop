@@ -1,10 +1,8 @@
-./.DS_Store
 ./.env
 ./.gitignore
 ./.rspec
 ./.ruby-gemset
 ./.ruby-version
-./app/.DS_Store
 ./app/assets/config/manifest.js
 ./app/assets/images/.keep
 ./app/assets/javascripts/application.js
@@ -27,6 +25,7 @@
 ./app/controllers/users_controller.rb
 ./app/controllers/visitors_controller.rb
 ./app/helpers/application_helper.rb
+./app/helpers/file_name_helper.rb
 ./app/helpers/product_helper.rb
 ./app/helpers/products_helper.rb
 ./app/jobs/application_job.rb

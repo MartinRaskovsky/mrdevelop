@@ -42,23 +42,6 @@
 
 <% if @images.length > 0 %>
   <h3>Images</h3>                                                                                                               
-  <!--table>
-  < % @images.length.times do |i| %>
-    < % img = @images[i].image %>
-    < % if i % 8 == 0 %>
-      < % if i > 0 %>
-    </tr>
-      < % end %>
-
-    <tr align=center>
-    < % end %>
-      <td>
-        < %= link_to(image_tag("#{img.thumb.url}", {:width => "64", :alt => "Image"}), "#{img.url}", target: '_blank') %>
-      </td>  
-  < % end %>
-    </tr>
-  </table-->
-
   <% @image = Image.new %>
   <% @image.name = @images[@design_index].image %>
   <%= render 'images_form', image: @image %>

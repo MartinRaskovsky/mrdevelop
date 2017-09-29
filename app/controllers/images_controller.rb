@@ -17,8 +17,8 @@ class ImagesController < ApplicationController
  
   def create
     commit = params[:commit]
-    if commit == "Select Image"
-      select_image
+    if commit == "Make Design"
+      make_design
    elsif commit == "Upload Image"
       upload_image
    else
@@ -50,7 +50,7 @@ class ImagesController < ApplicationController
 
   private
 
-  def has_image
+  def has_select_image
     if params.has_key?(:image)
       image = params['image']
       name = image["name"]
@@ -61,8 +61,19 @@ class ImagesController < ApplicationController
     return false
   end
 
-  def select_image
-    if has_image
+  def has_upload_image
+    if params.has_key?(:image)
+      image = params['image']
+      img = image["image"]
+      if img
+        return true
+      end
+    end
+    return false
+  end
+
+  def make_design
+    if has_select_image
       image = params['image']
       @image_name  = large_image_name(image["name"])
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => @image_name
@@ -72,7 +83,7 @@ class ImagesController < ApplicationController
   end
 
   def upload_image
-    if has_image
+    if has_upload_image
       @image = Image.new(image_params)
       if @image.save
         redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
@@ -80,7 +91,6 @@ class ImagesController < ApplicationController
         render :new
       end
     else
-      #url = { :controller => 'product', :action => 'index', :id => params["product_id"] }
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
     end
   end
