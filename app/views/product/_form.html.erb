@@ -10,5 +10,5 @@
   </div>
 
   <input value="<%= params[:id] %>" type="hidden" name="product_id" id="product_id" /> 
-  <%= f.submit "Upload Image" %>
+  <%= f.submit "Upload Image", :onclick => "return spinnerOn();" %>
 <% end %>
