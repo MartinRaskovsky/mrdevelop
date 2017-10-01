@@ -1,3 +1,5 @@
+include ImageHelper
+
 <center>
 <h3>Product</h3>
 <% if @product %>
@@ -32,6 +34,8 @@
           <div id='crop-img'>
             <%= image_tag("#{@design}", class: "under", width: "300") %>
           </div>
+          <!--% name = base_image_name("#{@design}") %>
+          < %= image_details(name) %-->
         <% end %>
     </td>
     <td class="product-mockup-sep">

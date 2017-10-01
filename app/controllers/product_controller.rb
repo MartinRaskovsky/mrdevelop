@@ -5,6 +5,9 @@ class ProductController < ApplicationController
     @images = Image.order('created_at DESC') if !@images
     @design = params['image_id']
     @design_index = 0
+    if @images.length == 0
+      @design = nil
+    end
     if @design
       @name = base_image_name(@design)
       @images.each_with_index {|img,i|

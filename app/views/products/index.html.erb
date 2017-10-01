@@ -15,7 +15,11 @@
 
       <tr align=center>
       <% end %>
-        <td><%= link_to image_tag("#{img}"), {:controller => "product", :action => "index", :id => id.to_s} %></td>
+        <td>
+          <%= link_to image_tag("#{img}"), {:controller => "product", :action => "index", :id => id.to_s} %>
+          <!--% image = MiniMagick::Image.open("#{img}") %>
+          <br>< %= image.width %> x < %= image.height %-->
+        </td>
     <% end %>
       </tr>
     </table>

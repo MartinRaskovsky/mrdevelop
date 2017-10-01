@@ -1,7 +1,36 @@
 <%= form_for image do |f| %>
-  <%= f.collection_radio_buttons(:name, @images, :image, :name) do |b|
+  <!--%= f.collection_radio_buttons(:name, @images, :image, :name) do |b|
   b.label { b.radio_button + image_tag(b.object.image.medium) }
-  end %>
+  end %-->
+
+  <table class="noborder">
+  <% @images.length.times do |i| %>
+    <% img = @images[i].image %>
+    <% url = img.to_s %>
+    <% medium = img.medium %>
+    <% id = "image_name_\"" + url + "\"" %>
+    <% checked = "" %>
+    <% if image.name == img.to_s %>
+      <% checked = raw(" checked=\"checked\"") %>
+    <% end %>
+    <% if i % 8 == 0 %>
+      <% if i > 0 %>
+    </tr>
+      <% end %>
+
+    <tr align=center class="noborder">
+    <% end %>
+      <td valign="bottom" class="noborder">
+        <label for="<%= url %>">
+          <input type="radio" value="<%= url %>" name="image[name]" id="<%= url %>"<%= checked %>>
+          <%= image_tag(medium) %>
+          <%= image_details(img.to_s) %>
+        </label>
+      </td>
+  <% end %>
+    </tr>
+  </table>
+
   <br>
   <input value="<%= params[:id] %>" type="hidden" name="product_id" id="product_id" />
   <%= f.submit "Make Design" %>
