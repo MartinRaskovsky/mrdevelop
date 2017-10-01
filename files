@@ -3,6 +3,7 @@
 ./.rspec
 ./.ruby-gemset
 ./.ruby-version
+./.x.swp
 ./app/assets/config/manifest.js
 ./app/assets/images/.keep
 ./app/assets/javascripts/application.js
@@ -14,6 +15,7 @@
 ./app/assets/stylesheets/application.css.scss
 ./app/assets/stylesheets/product.scss
 ./app/assets/stylesheets/products.scss
+./app/assets/stylesheets/spinner.css
 ./app/channels/application_cable/channel.rb
 ./app/channels/application_cable/connection.rb
 ./app/controllers/application_controller.rb
@@ -56,8 +58,10 @@
 ./app/views/layouts/mailer.html.erb
 ./app/views/layouts/mailer.text.erb
 ./app/views/pages/about.html.erb
+./app/views/product/._mockup_form.html.erb.swp
 ./app/views/product/_form.html.erb
 ./app/views/product/_images_form.html.erb
+./app/views/product/_mockup_form.html.erb
 ./app/views/product/index.html.erb
 ./app/views/products/index.html.erb
 ./app/views/users/_user.html.erb

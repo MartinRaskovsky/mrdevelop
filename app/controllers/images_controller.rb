@@ -21,6 +21,8 @@ class ImagesController < ApplicationController
       make_design
    elsif commit == "Upload Image"
       upload_image
+   elsif commit == "Generate Mockup"
+      generate_mockup
    else
       url = { :controller => 'product', :action => 'index', :id => params["product_id"] }
       redirect_to url
@@ -72,6 +74,13 @@ class ImagesController < ApplicationController
     return false
   end
 
+  def has_design
+    if params.has_key?(:image_id)
+      return true
+    end
+    return false
+  end
+
   def make_design
     if has_select_image
       image = params['image']
@@ -90,6 +99,19 @@ class ImagesController < ApplicationController
       else
         render :new
       end
+    else
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
+    end
+  end
+
+  def generate_mockup
+    config.logger = Logger.new(STDOUT)
+    logger.debug params
+    if has_design
+      logger.debug "HAS_DESIGN, x and y follow"
+      logger.debug params['xpos_field']
+      logger.debug params['ypos_field']
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
     else
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
     end

@@ -19,7 +19,7 @@
         <%= image_tag("#{image}") %>
     </td>
     <td class="product-mockup-sep">
-        +
+      +
     </td>
     <td  class="product-mockup">
         <%if @design %>
@@ -34,11 +34,18 @@
           </div>
         <% end %>
     </td>
+    <td class="product-mockup-sep">
+     = 
+    </td>
+    <td class="product-mockup-gen">
+      <% if @design %>
+        <% @image = Image.new %>
+        <% @image.name = @images[@design_index].image %>
+        <%= render 'mockup_form', image: @image %>
+      <% end %>
+    </td>
   </tr>
   </table>
-  <!--% @product.each do |key, value| %>
-    <li><b>< %= key %></b> < %= value %></li>
-  < % end %-->
 
 <% if @images.length > 0 %>
   <h3>Images</h3>                                                                                                               
@@ -47,32 +54,25 @@
   <%= render 'images_form', image: @image %>
 <% end %>
 <script>
-window.onload = addListeners();
-var x_pos = 0,
-    y_pos = 0;
-
-function addListeners() {
-  document.getElementById('under').addEventListener('mousedown', mouseDown, false);
-  window.addEventListener('mouseup', mouseUp, false);
-}
-
-function mouseUp() {
-  window.removeEventListener('mousemove', divMove, true);
-}
+var xorig = 0,
+    yorig = 0,
+    xdelta = 0,
+    ydelta = 0;
 
 function mouseDown(e) {
-  var div = document.getElementById('under');
-  x_pos = e.clientX - div.offsetLeft;
-  y_pos = e.clientY - div.offsetTop;
-  window.addEventListener('mousemove', divMove, true);
+  xorig = e.clientX;
+  yorig = e.clientY;
 }
 
-function divMove(e) {
-  var div = document.getElementById('under');
-  div.style.position = 'absolute';
-  div.style.top = (e.clientY - y_pos) + 'px';
-  div.sty
+function mouseUp(e) {
+  xdelta += (e.clientX - xorig);
+  ydelta += (e.clientY - yorig);
+  document.getElementById("xpos_field").setAttribute('value', xdelta.toString());
+  document.getElementById("ypos_field").setAttribute('value', ydelta.toString());
+  console.log(document.getElementById("xpos_field").getAttribute('value')
+     + ", " + document.getElementById("ypos_field").getAttribute('value'));
 }
+
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="https://code.jquery.com/ui/jquery-ui-git.js"></script>
@@ -80,7 +80,12 @@ function divMove(e) {
 $(".under").draggable({});
 $(".over").mousedown(function(event){
     $(".under").trigger(event);
-});</script>
+    mouseDown(event);
+});
+$(".over").mouseup(function(event){
+    mouseUp(event);
+});
+</script>
 
 <h3>Upload</h3>
 <div class="spinner">
