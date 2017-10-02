@@ -1,4 +1,6 @@
 include FileNameHelper
+include ImageHelper
+include PostHelper
 
 class ImagesController < ApplicationController
   before_action :set_image, only: [:show, :edit, :update]
@@ -105,12 +107,12 @@ class ImagesController < ApplicationController
   end
 
   def generate_mockup
-    config.logger = Logger.new(STDOUT)
-    logger.debug params
     if has_design
-      logger.debug "HAS_DESIGN, x and y follow"
-      logger.debug params['xpos_field']
-      logger.debug params['ypos_field']
+      x = params['xpos_field'].to_i
+      y = params['ypos_field'].to_i
+      w = 1000
+      image_name = generate_image(base_image_name(params['image_id']), x, y, w)
+      post_mockup(params['product_id'], [1, 2, 3, 4], image_name)
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
     else
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
