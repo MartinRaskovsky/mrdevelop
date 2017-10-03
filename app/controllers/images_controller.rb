@@ -118,6 +118,9 @@ class ImagesController < ApplicationController
       details = printfile_details(product_id, vars)
       
       image_name = generate_image(base_image_name(params['image_id']), x, y, w)
+      details.each do |detail|
+        detail['printfile'].store("image_url", image_name)
+      end
 
       post_mockup(product_id, details)
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]

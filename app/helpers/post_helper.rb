@@ -64,13 +64,16 @@ module PostHelper
       text << '    "variant_ids" : ' + detail['variants'].to_s + ','
       text << '    "format": "jpg",'
       text << '    "files" : ['
+      done = false
       detail['placements'].each.with_index do |placement, i|
-        text << '    { '
-        text << '      "placement": "' + placement[0] + '",'
-        text << '      "image_url": "' + "FIX IMG" + '"'
-        if i < detail['placements'].length-1
-          text << '    },'
-        else
+        if !placement[0].start_with?("label")
+          if done
+            text << ','
+          end
+          done = true
+          text << '    { '
+          text << '      "placement": "' + placement[0] + '",'
+          text << '      "image_url": "' + detail['printfile']["image_url"]  + '"'
           text << '    }'
         end
       end
