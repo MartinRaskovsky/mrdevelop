@@ -107,16 +107,95 @@ class ImagesController < ApplicationController
   end
 
   def generate_mockup
+    config.logger = Logger.new(STDOUT)
     if has_design
+      product_id = params['product_id']
       x = params['xpos_field'].to_i
       y = params['ypos_field'].to_i
       w = 1000
+
+      vars = printfile_variants(product_id)
+      details = printfile_details(product_id, vars)
+      
       image_name = generate_image(base_image_name(params['image_id']), x, y, w)
-      post_mockup(params['product_id'], [1, 2, 3, 4], image_name)
+
+      post_mockup(product_id, details)
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
     else
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
     end
+  end
+
+  def printfile_variants(product_id)
+    variants = get_variants(product_id)
+    if !variants
+      return [ product_id ]
+    end
+
+    if variants.length > 1
+      return [ variants[0]['id'], variants[1]['id'] ]
+    end
+
+    if variants.length == 1
+      return [ variants[0]['id'] ]
+    end
+
+    return [ product_id ]
+  end
+
+  def find_var_printfile(printfiles, id)
+    printfiles.each do |printfile|
+      if printfile['variant_id'] == id
+        return printfile
+      end
+    end
+    logger.debug "Failed to find variant_id " + id.to_s
+    return nil
+  end
+
+  def find_printfile(printfiles, id)
+    printfiles.each do |printfile|
+      if printfile['printfile_id'] == id
+        return printfile
+      end
+    end
+    logger.debug "Failed to find variant_id " + id.to_s
+    return nil
+  end
+
+  def find_detail(details, placements)
+    details.each do |detail|
+      if detail["placements"] == placements
+        return detail
+      end
+    end
+    return nil
+  end
+
+  def printfile_details(product_id, vars)
+    result = []
+    details = get_printfile_details(product_id)
+    vars.each do |var_id|
+      var_printfiles = details['variant_printfiles']
+      printfiles = details['printfiles']
+      var_printfile = find_var_printfile(var_printfiles, var_id)
+      if var_printfile
+        placements = var_printfile['placements']
+        detail = find_detail(result, placements)
+        if detail
+          detail["variants"] << var_id
+        else
+          # TEMPORARY generated only for FIRTS placement
+          placement_id = placements.values[0]
+          printfile = find_printfile(printfiles, placement_id)
+          add = { "variants" => [ var_id ], 'placements' => placements, "printfile" => printfile }
+          result << add
+        end
+      end
+    end
+
+    logger.debug result
+    return result
   end
 
 end

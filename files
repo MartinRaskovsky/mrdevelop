@@ -28,6 +28,7 @@
 ./app/helpers/application_helper.rb
 ./app/helpers/file_name_helper.rb
 ./app/helpers/image_helper.rb
+./app/helpers/post_helper.rb
 ./app/helpers/product_helper.rb
 ./app/helpers/products_helper.rb
 ./app/jobs/application_job.rb

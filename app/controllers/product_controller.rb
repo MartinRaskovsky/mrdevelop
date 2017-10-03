@@ -1,4 +1,5 @@
 include FileNameHelper
+include PostHelper
 
 class ProductController < ApplicationController
   def index
@@ -18,17 +19,20 @@ class ProductController < ApplicationController
       }
     end
     @id = params['id'].to_i
-    @product = nil
-    content = open("https://api.printful.com/products").read
-    @toplevel = JSON.parse content
-    if @toplevel['code'] == 200
-      @products = @toplevel["result"]
-      @products.each do |product|
-        if product['id'] == @id
-          @product = product
-          break
-        end
-      end
+    @product = get_product(params['id'])
+    if !@product
+      redirect_to :controller => 'products', :action => 'index'
     end
+    #content = open("https://api.printful.com/products").read
+    #@toplevel = JSON.parse content
+    #if @toplevel['code'] == 200
+    #  @products = @toplevel["result"]
+    #  @products.each do |product|
+    #    if product['id'] == @id
+    #      @product = product
+    #      break
+    #    end
+    #  end
+    #end
   end
 end
