@@ -1,0 +1,2 @@
+class Mockup < ApplicationRecord
+end

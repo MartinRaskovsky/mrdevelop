@@ -118,12 +118,37 @@ class ImagesController < ApplicationController
       details = printfile_details(product_id, vars)
       
       image_name = generate_image(base_image_name(params['image_id']), x, y, w)
+      remote_image = put_img(image_name, current_user.id, 0)
+
       details.each do |detail|
-        detail['printfile'].store("image_url", image_name)
+        detail['printfile'].store("image_url", remote_image)
       end
 
-      post_mockup(product_id, details)
-      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      mockups = post_mockup(product_id, details)
+      if mockups
+        mockups.each do |mockup|
+          thumb_url  =  generate_thumb(mockup["mockup_url"])
+          product_url = product_thumb(params["product_id"])
+          image_url =   image_thumb(params['image_id'])
+          args = {
+            "variant_ids" => mockup["variant_ids"].to_s,
+            "placement"   => mockup["placement"],
+            "mockup_url"  => mockup["mockup_url"],
+            "thumb_url"   => thumb_url,
+            "product_url" => product_url,
+            "image_url"   => image_url
+          }
+          logger.debug args['mockup_url']
+          logger.debug params
+          @mockup = Mockup.new(args)
+          if !@mockup.save
+            debug.logger "Failed to save mockup"
+          end
+        end
+        redirect_to :controller => '/mockups'
+      else
+        redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      end
     else
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
     end
@@ -201,4 +226,16 @@ class ImagesController < ApplicationController
     return result
   end
 
+  def generate_thumb(mockup_url)
+    return scale_to_url_thumb(mockup_url);
+  end
+
+  def product_thumb(product_id)
+    product = get_product(product_id)
+    return scale_to_url_thumb(product['image']);
+  end
+
+  def image_thumb(large_url)
+    return thumb_image_name(large_url)
+  end
 end

@@ -1,8 +1,61 @@
 require 'net/http'
 require 'uri'
 require 'json'
+require 'base64'
+require 'openssl'
 
 module PostHelper
+
+  def put_img(img_file, user_id, index)
+    init("put_img")
+    logger.debug user_id
+    logger.debug img_file
+
+    dst_host = "http://martinR.com"
+    dst_base = user_id.to_s + "/" + Time.now.to_i.to_s + "_" + index.to_s + ".jpg"
+    dst_url = dst_host + "/mockups/" + dst_base
+    url = dst_host + "/cgi-bin/mockups.cgi"
+    logger.debug url
+
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = (uri.scheme == 'https')
+    #http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    boundary = "AaB03x"
+    #header = {"Content-Type": "multipart/form-data; boundary=#{boundary}"}
+
+    post_body = []
+
+    # Add the file Data
+    file = open(img_file)
+    post_body << "--#{boundary}\r\n\r\n"
+    post_body << "Content-Disposition: form-data; name=\"file\"; filename=\"#{File.basename(img_file)}\"\r\n"
+    post_body << "Content-Type: text/plain\r\n"
+    post_body << "\r\n"
+    post_body << Base64.encode64(file.read)
+    file.close
+
+    # Add the name
+    post_body << "\r\n--#{boundary}\r\n"
+    post_body << "Content-Disposition: form-data; name=\"name\"\r\n\r\n"
+    post_body << dst_base
+    post_body << "\r\n--#{boundary}--\r\n"
+
+    request = Net::HTTP::Post.new(uri.request_uri)
+    request["Content-Type"] = "multipart/form-data; boundary=#{boundary}"
+    #request.set_form_data({'name' => '"' + dst_base +'"'}, ';')
+  
+    request.body = post_body.join
+ 
+    response = http.request(request)
+
+    logger.debug response.code
+    logger.debug response.body
+    logger.debug dst_url
+
+    return dst_url
+  end
 
   def get_product(product_id)                                                                                              
     init("get_product")
@@ -55,15 +108,15 @@ module PostHelper
     logger.debug product_id
     logger.debug  details.to_s
 
-    url = "https://api.printful.com/mockup-generator/generate/" + product_id
+    url = "https://api.printful.com/mockup-generator/create-task/" + product_id
 
     # TEMPORARY process each request sequentially
     details.each do |detail|
-      text = ''
+      text = []
       text << '{'
-      text << '    "variant_ids" : ' + detail['variants'].to_s + ','
-      text << '    "format": "jpg",'
-      text << '    "files" : ['
+      text << '    "variant_ids": ' + detail['variants'].to_s + ','
+      text << '    "format":"jpg",'
+      text << '    "files":['
       done = false
       detail['placements'].each.with_index do |placement, i|
         if !placement[0].start_with?("label")
@@ -71,7 +124,7 @@ module PostHelper
             text << ','
           end
           done = true
-          text << '    { '
+          text << '    {'
           text << '      "placement": "' + placement[0] + '",'
           text << '      "image_url": "' + detail['printfile']["image_url"]  + '"'
           text << '    }'
@@ -79,25 +132,46 @@ module PostHelper
       end
       text << '  ]'
       text << '}'
-  
-      response = post_json(url, text, ENV["PRINTFUL_KEY"])
-      if !response
+
+      result = post_json(url, text.join, ENV["EPRINTFUL_KEY"])
+      if !result
         return nil
       end
 
-      task_key = response[0]['task_key']
-      status = response[0]['status']
+      task_key = result['task_key']
+      status = result['status']
       if status == "pending"
-        logger.debug "OK got pending"
+        logger.debug "OK got pending: " + task_key.to_s
       else
         logger.debug "Unexpected status: " + status
         return nil
       end
 
-      # after a few secs do a GET on
-      #https://api.printful.com/mockup-generator/task?task_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa
-  
-      #At this point, you just have to download the mockup URLs and store them on your own server and you're good to go!
+      url = "http://api.printful.com/mockup-generator/task?task_key=" + task_key.to_s
+
+      while status == "pending"
+        logger.debug "Sleeping 3 sec ..."
+        sleep(3);
+        result = http_get(url, ENV["PRINTFUL_KEY"])
+        if result
+          status = result['status']
+        else
+          logger.debug "Failed to GET, trying again"
+        end
+      end
+
+      if status != "completed"
+        logger.debug "Unexpected status " + status
+        return nil
+      end
+      
+       mockups = result['mockups'] 
+      if mockups == nil
+        logger.debug "Failed to GET mockups"
+      end
+
+      logger.debug mockups
+      return mockups
     end
   end
 
@@ -116,7 +190,10 @@ module PostHelper
       puts "No Content"
       return nil
     when Net::HTTPBadRequest then
+      puts ""
+      puts content.read_body
       puts "Bad Request"
+      puts ""
       return nil
     when Net::HTTPUnauthorized then
       puts "Unauthorized"
@@ -208,7 +285,7 @@ module PostHelper
 
     # Create the HTTP objects
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = url.start_with?("https://")
+    http.use_ssl = (uri.scheme == 'https')
 
     request = Net::HTTP::Get.new(uri)
     request['Authorization'] = "Basic " + Base64::encode64(auth_key) if auth_key
@@ -229,29 +306,23 @@ module PostHelper
     logger.debug "post_json"
     logger.debug url
     logger.debug text
+    logger.debug auth_key if auth_key
 
-    url = "http://localhost:3000/post"
     uri = URI.parse(url)
-
-    header = {'Content-Type': 'text/json'}
 
     # Create the HTTP objects
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
+    http.use_ssl = (uri.scheme == 'https')
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-    request = Net::HTTP::Post.new(uri.request_uri, header)
-    request['authorization'] = auth_key if auth_key
-    request.body = text.to_json
+    request = Net::HTTP::Post.new(uri)
+    request["content-type"] = 'application/json'
+    request["authorization"] = "Basic " + auth_key
+    request.body = text
 
-    if false
-      # Send the request
-      content = http.request(request)
-      content = http.start {|http| http.request(request) }
-      content = validate_content(content)
-    else
-      #simulate
-      content = '{ "code": 200, "result": [{ "task_key": 123, "status": "pending" }]}'
-    end
+    # Send the request
+    content = http.request(request)
+    content = validate_content(content)
 
     if !content
       return nil

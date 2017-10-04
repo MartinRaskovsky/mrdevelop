@@ -3,5 +3,5 @@
   <input value="<%= params[:image_id] %>" type="hidden" name="image_id" id="image_id" />
   <input value="0" type="hidden" name="xpos_field" id="xpos_field" />
   <input value="0" type="hidden" name="ypos_field" id="ypos_field" />
-  <%= f.submit "Generate Mockup" %>
+  <%= f.submit "Generate Mockup", :onclick => "return spinnerOn();" %>
 <% end %>

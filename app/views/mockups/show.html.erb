@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Mockup url:</strong>
+  <%= @mockup.mockup_url %>
+</p>
+
+<p>
+  <strong>Placement:</strong>
+  <%= @mockup.placement %>
+</p>
+
+<p>
+  <strong>Variant ids:</strong>
+  <%= @mockup.variant_ids %>
+</p>
+
+<%= link_to 'Edit', edit_mockup_path(@mockup) %> |
+<%= link_to 'Back', mockups_path %>

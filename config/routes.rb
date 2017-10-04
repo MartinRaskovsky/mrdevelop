@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :mockups
   resources :product do
     resources :index
   end

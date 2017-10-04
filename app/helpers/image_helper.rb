@@ -45,7 +45,7 @@ module ImageHelper
     #logger.debug image.width
     #logger.debug image.height
 
-    dst = destination_dir + File.basename(name)
+    dst = mockup_dir + File.basename(name)
 
     image.write dst
 
@@ -54,9 +54,41 @@ module ImageHelper
 
   private
 
-  def destination_dir
+  def scale_to_url_thumb(name)
+    image = MiniMagick::Image.open(name)
+    w_original= image.width.to_f
+    h_original= image.height.to_f
+
+    w = 64
+    h = (h_original * w) / w_original
+
+    geometry = w.to_s + "x" + h.to_i.to_s
+    image.resize geometry
+
+    base = File.basename(name)
+
+    dst = thumb_dir + base
+    image.write dst
+
+    url = thumb_url + base
+    return url
+  end
+
+  def mockup_dir
     dir = "public/mockups/"
     FileUtils.mkdir_p(dir) unless File.directory?(dir)
-    dir
+    return dir
   end
+
+  def thumb_dir
+    dir = "public/thumbs/"
+    FileUtils.mkdir_p(dir) unless File.directory?(dir)
+    return dir
+  end
+
+  def thumb_url
+    url = "/thumbs/"
+    return url
+  end
+
 end

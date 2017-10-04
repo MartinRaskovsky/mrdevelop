@@ -8,12 +8,15 @@
 ./app/assets/javascripts/application.js
 ./app/assets/javascripts/cable.js
 ./app/assets/javascripts/channels/.keep
+./app/assets/javascripts/mockups.coffee
 ./app/assets/javascripts/product.coffee
 ./app/assets/javascripts/products.coffee
 ./app/assets/stylesheets/1st_load_framework.css.scss
 ./app/assets/stylesheets/application.css.scss
+./app/assets/stylesheets/mockups.scss
 ./app/assets/stylesheets/product.scss
 ./app/assets/stylesheets/products.scss
+./app/assets/stylesheets/scaffolds.scss
 ./app/assets/stylesheets/spinner.css
 ./app/channels/application_cable/channel.rb
 ./app/channels/application_cable/connection.rb
@@ -21,6 +24,7 @@
 ./app/controllers/concerns/.keep
 ./app/controllers/home_controller.rb
 ./app/controllers/images_controller.rb
+./app/controllers/mockups_controller.rb
 ./app/controllers/product_controller.rb
 ./app/controllers/products_controller.rb
 ./app/controllers/users_controller.rb
@@ -28,6 +32,7 @@
 ./app/helpers/application_helper.rb
 ./app/helpers/file_name_helper.rb
 ./app/helpers/image_helper.rb
+./app/helpers/mockups_helper.rb
 ./app/helpers/post_helper.rb
 ./app/helpers/product_helper.rb
 ./app/helpers/products_helper.rb
@@ -36,6 +41,7 @@
 ./app/models/application_record.rb
 ./app/models/concerns/.keep
 ./app/models/image.rb
+./app/models/mockup.rb
 ./app/models/shop.rb
 ./app/models/user.rb
 ./app/services/create_admin_service.rb
@@ -58,6 +64,14 @@
 ./app/views/layouts/embedded_app.html.erb
 ./app/views/layouts/mailer.html.erb
 ./app/views/layouts/mailer.text.erb
+./app/views/mockups/_form.html.erb
+./app/views/mockups/_mockup.json.jbuilder
+./app/views/mockups/edit.html.erb
+./app/views/mockups/index.html.erb
+./app/views/mockups/index.json.jbuilder
+./app/views/mockups/new.html.erb
+./app/views/mockups/show.html.erb
+./app/views/mockups/show.json.jbuilder
 ./app/views/pages/about.html.erb
 ./app/views/product/_form.html.erb
 ./app/views/product/_images_form.html.erb
@@ -106,8 +120,6 @@
 ./package.json
 ./Rakefile
 ./README
-./README.md
-./README.textile
 ./time.stamp
 ./vendor/.keep
 ./vendor/assets/javascripts/.keep

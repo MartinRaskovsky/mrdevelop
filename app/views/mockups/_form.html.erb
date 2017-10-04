@@ -1,0 +1,32 @@
+<%= form_with(model: mockup, local: true) do |form| %>
+  <% if mockup.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(mockup.errors.count, "error") %> prohibited this mockup from being saved:</h2>
+
+      <ul>
+      <% mockup.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :mockup_url %>
+    <%= form.text_field :mockup_url, id: :mockup_mockup_url %>
+  </div>
+
+  <div class="field">
+    <%= form.label :placement %>
+    <%= form.text_field :placement, id: :mockup_placement %>
+  </div>
+
+  <div class="field">
+    <%= form.label :variant_ids %>
+    <%= form.text_field :variant_ids, id: :mockup_variant_ids %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
