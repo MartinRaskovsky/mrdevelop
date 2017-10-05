@@ -111,7 +111,6 @@
 ./config/secrets.yml
 ./config/spring.rb
 ./config.ru
-./files
 ./Gemfile
 ./Gemfile.lock
 ./Guardfile

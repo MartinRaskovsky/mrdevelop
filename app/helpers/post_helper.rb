@@ -6,13 +6,12 @@ require 'openssl'
 
 module PostHelper
 
-  def put_img(img_file, user_id, index)
+  def put_img(img_file, index)
     init("put_img")
-    logger.debug user_id
     logger.debug img_file
 
     dst_host = "http://martinR.com"
-    dst_base = user_id.to_s + "/" + Time.now.to_i.to_s + "_" + index.to_s + ".jpg"
+    dst_base = file_unique2(index, img_file)
     dst_url = dst_host + "/mockups/" + dst_base
     url = dst_host + "/cgi-bin/mockups.cgi"
     logger.debug url
@@ -48,7 +47,12 @@ module PostHelper
   
     request.body = post_body.join
  
-    response = http.request(request)
+    #response = http.request(request)
+    response = safe_request(http, request)
+
+    if !response
+      return nil
+    end
 
     logger.debug response.code
     logger.debug response.body
@@ -76,17 +80,18 @@ module PostHelper
 
     result = http_get(url, nil)
 
-    if !validate_product(result, product_id)
-      return nil
+    product = validate_product(result, product_id)
+    if !product
+      return [nil, nil]
     end
 
     variants = result['variants']
     if !variants
       logger.debug "Failed to get variants from GET"
-      return nil
+      return [product, nil]
     end
 
-    return variants
+    return [product, variants]
   end
 
   def get_printfile_details(product_id)
@@ -165,7 +170,7 @@ module PostHelper
         return nil
       end
       
-       mockups = result['mockups'] 
+      mockups = result['mockups'] 
       if mockups == nil
         logger.debug "Failed to GET mockups"
       end
@@ -329,6 +334,39 @@ module PostHelper
     end
 
     return validate_result(content)
+  end
+
+  def file_unique2(index, name)
+    name = current_user.id.to_s + "/" + Time.now.to_i.to_s + "_" + index.to_s + "_" + File.basename(name)
+    name = name.downcase
+    return name
+  end
+
+  def safe_request(http, request)
+    openuri_params = {
+      # set timeout durations for HTTP connection
+      # default values for open_timeout and read_timeout is 60 seconds
+      :open_timeout => 1,
+      :read_timeout => 1,
+    }
+
+    attempt_count = 0
+    max_attempts  = 3 
+
+    begin
+      attempt_count += 1
+      logger.debug "attempt ##{attempt_count}"
+      response = http.request(request)
+    rescue OpenURI::HTTPError => e
+      # it's 404, etc. (do nothing)
+    rescue SocketError, Net::ReadTimeout => e
+      # server can't be reached or doesn't send any respones
+      logger.debug "error: #{e}"
+      sleep 3
+      retry if attempt_count < max_attempts
+    end
+
+    return response
   end
 
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171004150022) do
+ActiveRecord::Schema.define(version: 20171005082138) do
 
   create_table "images", force: :cascade do |t|
     t.string "name"
@@ -23,11 +23,13 @@ ActiveRecord::Schema.define(version: 20171004150022) do
     t.string "mockup_url"
     t.string "placement"
     t.string "variant_ids"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.string "thumb_url"
     t.string "product_url"
     t.string "image_url"
+    t.integer "printful_id", limit: 8
+    t.integer "shopify_id", limit: 8
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "shops", force: :cascade do |t|

@@ -19,8 +19,8 @@ class ProductController < ApplicationController
       }
     end
     @id = params['id'].to_i
-    @product = get_product(params['id'])
-    if !@product
+    @product, @variants = get_variants(params['id'])
+    if !@variants
       redirect_to :controller => 'products', :action => 'index'
     end
   end

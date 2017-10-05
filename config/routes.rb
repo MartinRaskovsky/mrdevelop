@@ -7,10 +7,11 @@ Rails.application.routes.draw do
   get '/products' => 'products#index'
 
   resources :x_users
-  root to: 'visitors#index'
+  root to: 'mockups#index'
   devise_for :users
   resources :users
   resources :images
   mount ShopifyApp::Engine, at: '/'
   get "/shopify" => 'home#index'
+  get "/mockups/new/:id" => 'mockups#index'
 end

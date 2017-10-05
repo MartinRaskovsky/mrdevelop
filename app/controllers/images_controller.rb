@@ -118,7 +118,7 @@ class ImagesController < ApplicationController
       details = printfile_details(product_id, vars)
       
       image_name = generate_image(base_image_name(params['image_id']), x, y, w)
-      remote_image = put_img(image_name, current_user.id, 0)
+      remote_image = put_img(image_name, 0)
 
       details.each do |detail|
         detail['printfile'].store("image_url", remote_image)
@@ -136,8 +136,10 @@ class ImagesController < ApplicationController
             "mockup_url"  => mockup["mockup_url"],
             "thumb_url"   => thumb_url,
             "product_url" => product_url,
-            "image_url"   => image_url
-          }
+            "image_url"   => image_url,
+            "printful_id" => params["product_id"].to_i,
+            "shopify_id"  => 0
+         }
           logger.debug args['mockup_url']
           logger.debug params
           @mockup = Mockup.new(args)
@@ -155,7 +157,7 @@ class ImagesController < ApplicationController
   end
 
   def printfile_variants(product_id)
-    variants = get_variants(product_id)
+    products, variants = get_variants(product_id)
     if !variants
       return [ product_id ]
     end
