@@ -14,6 +14,36 @@
 <ul>
   <% @products.each do |product| %>
     <li><%= link_to product.title, "https://#{@shop_session.url}/admin/products/#{product.id}", target: "_top" %></li>
+  <!--% end %>
+  < % product=@products.last %-->
+  <% imgs=product.images %>
+  <% opts=product.options %>
+  <table>
+    <tr><td>title</td><td><%= product.title %></td></tr>
+    <tr><td>body_html</td><td><%= raw(product.body_html) %></td></tr>
+
+    <% opts.each do |opt| %>
+    <tr><td><%= opt.name %></td><td><table><tr>
+    <% opt.values.each do |val| %>
+      <td><%= val %></td>
+    <% end %>
+    </tr></table></td></tr>
+    <% end %>
+
+    <tr><td>images</td><td>
+    <table><tr>
+      <% imgs.each_with_index {|img,i| %>
+        <% if i % 8 == 0 %>
+          <% if i > 0 %>
+            </tr>
+          <% end %>
+          <tr align=center>
+        <% end %>
+        <td><%= image_tag("#{img.src}", {:width => "128"}) %></td>
+      <% } %>
+    </tr>
+  </table>
+  </td></tr></table>
   <% end %>
 </ul>
 
