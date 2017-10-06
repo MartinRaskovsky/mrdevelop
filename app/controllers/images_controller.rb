@@ -118,7 +118,14 @@ class ImagesController < ApplicationController
       details = printfile_details(product_id, vars)
       
       image_name = generate_image(base_image_name(params['image_id']), x, y, w)
-      remote_image = put_img(image_name, 0)
+      if true
+        remote_image = put_img(image_name, 0)
+      else
+        remote_image = "http://martinr.com/img/barcelona/Sagrada_Familia_I_DSC_5914-m.jpg"
+      end
+      if remote_image == nil
+        redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      end
 
       details.each do |detail|
         detail['printfile'].store("image_url", remote_image)
@@ -139,9 +146,7 @@ class ImagesController < ApplicationController
             "image_url"   => image_url,
             "printful_id" => params["product_id"].to_i,
             "shopify_id"  => 0
-         }
-          logger.debug args['mockup_url']
-          logger.debug params
+          }
           @mockup = Mockup.new(args)
           if !@mockup.save
             debug.logger "Failed to save mockup"

@@ -175,7 +175,6 @@ module PostHelper
         logger.debug "Failed to GET mockups"
       end
 
-      logger.debug mockups
       return mockups
     end
   end

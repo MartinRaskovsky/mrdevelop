@@ -7,7 +7,6 @@ module ImageHelper
   end
 
   def generate_image(name, x, y, w)
-    #config.logger = Logger.new(STDOUT)
     #logger.debug "generate_image"
     #logger.debug name
     #logger.debug x
@@ -55,7 +54,7 @@ module ImageHelper
   private
 
   def scale_to_url_thumb(name)
-    logger.debug "generate_image"
+    logger.debug "scale_to_url_thumb"
     logger.debug name
 
     image = MiniMagick::Image.open(name)
