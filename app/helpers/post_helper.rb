@@ -350,7 +350,7 @@ module PostHelper
     }
 
     attempt_count = 0
-    max_attempts  = 3 
+    max_attempts  = 1 
 
     begin
       attempt_count += 1

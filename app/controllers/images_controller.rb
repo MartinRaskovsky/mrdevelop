@@ -125,6 +125,7 @@ class ImagesController < ApplicationController
       end
       if remote_image == nil
         redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+        return
       end
 
       details.each do |detail|
