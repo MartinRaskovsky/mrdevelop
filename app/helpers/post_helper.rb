@@ -354,11 +354,13 @@ module PostHelper
       response = http.request(request)
     rescue OpenURI::HTTPError => e
       # it's 404, etc. (do nothing)
+      flash[:notice] = "Error: #{e}"
     rescue SocketError, Net::ReadTimeout => e
       # server can't be reached or doesn't send any respones
-      logger.debug "error: #{e}"
+      logger.debug "Error: #{e}"
       sleep 3
       retry if attempt_count < max_attempts
+      flash[:notice] = "Server can't be reached or doesn't send any respones - Error: #{e}" 
     end
 
     return response
