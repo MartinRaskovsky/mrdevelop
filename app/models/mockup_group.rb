@@ -1,0 +1,2 @@
+class MockupGroup < ApplicationRecord
+end

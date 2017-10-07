@@ -7,14 +7,13 @@ require 'openssl'
 module PostHelper
 
   def put_img(img_file, index)
-    init("put_img")
-    logger.debug img_file
+    init("put_img(" + img_file + ", " + index.to_s + ")")
 
     dst_host = "http://martinR.com"
     dst_base = file_unique2(index, img_file)
     dst_url = dst_host + "/mockups/" + dst_base
     url = dst_host + "/cgi-bin/mockups.cgi"
-    logger.debug url
+    #logger.debug url
 
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
@@ -47,23 +46,21 @@ module PostHelper
   
     request.body = post_body.join
  
-    #response = http.request(request)
     response = safe_request(http, request)
 
     if !response
       return nil
     end
 
-    logger.debug response.code
-    logger.debug response.body
-    logger.debug dst_url
+    #logger.debug response.code
+    #logger.debug response.body
 
+    logger.debug "put_img=" + dst_url
     return dst_url
   end
 
-  def get_product(product_id)                                                                                              
-    init("get_product")
-    logger.debug product_id
+  def get_product(product_id)
+    init("get_product(" + product_id + ")")
 
     url = "http://api.printful.com/products/" + product_id
 
@@ -73,8 +70,7 @@ module PostHelper
   end
 
   def get_variants(product_id)
-    init("get_variants")
-    logger.debug product_id
+    init("get_variants(" + product_id + ")")
 
     url = "https://api.printful.com/products/" + product_id
 
@@ -95,8 +91,7 @@ module PostHelper
   end
 
   def get_printfile_details(product_id)
-    init("get_printfile_details")
-    logger.debug product_id
+    init("get_printfile_details(" + product_id + ")")
 
     url = "http://api.printful.com/mockup-generator/printfiles/" + product_id
     result = http_get(url, ENV["PRINTFUL_KEY"])
@@ -109,9 +104,7 @@ module PostHelper
   end
 
   def post_mockup(product_id, details)
-    init("post_mockup")
-    logger.debug product_id
-    logger.debug  details.to_s
+    init("post_mockup(" + product_id + ", " + details.to_s + ")")
 
     url = "https://api.printful.com/mockup-generator/create-task/" + product_id
 
@@ -145,9 +138,7 @@ module PostHelper
 
       task_key = result['task_key']
       status = result['status']
-      if status == "pending"
-        logger.debug "OK got pending: " + task_key.to_s
-      else
+      if status != "pending"
         logger.debug "Unexpected status: " + status
         return nil
       end
@@ -281,9 +272,11 @@ module PostHelper
   end
 
   def http_get(url, auth_key)
-    logger.debug "http_get"
-    logger.debug url
-    logger.debug auth_key if auth_key
+    if auth_key
+      init("http_get(" + url + ", " + auth_key + ")")
+    else
+      init("http_get(" + url + ")")
+    end
 
     uri = URI.parse(url)
 
@@ -296,7 +289,7 @@ module PostHelper
     request.body = ""
 
     # Send the request
-    content = http.request(request)
+    content = safe_request(http, request)
     content = validate_content(content)
 
     if !content
@@ -307,10 +300,11 @@ module PostHelper
   end
 
   def post_json(url, text, auth_key)
-    logger.debug "post_json"
-    logger.debug url
-    logger.debug text
-    logger.debug auth_key if auth_key
+    if auth_key
+      init("post_json(" + url + ", " + text + ", " + auth_key + ")")
+    else
+      init("post_json(" + url + ", " + text + ")")
+    end
 
     uri = URI.parse(url)
 
@@ -325,7 +319,7 @@ module PostHelper
     request.body = text
 
     # Send the request
-    content = http.request(request)
+    content = safe_request(http, request)
     content = validate_content(content)
 
     if !content
@@ -350,11 +344,13 @@ module PostHelper
     }
 
     attempt_count = 0
-    max_attempts  = 1 
+    max_attempts  = 3
 
     begin
       attempt_count += 1
-      logger.debug "attempt ##{attempt_count}"
+      if attempt_count > 1
+        logger.debug "attempt ##{attempt_count}"
+      end
       response = http.request(request)
     rescue OpenURI::HTTPError => e
       # it's 404, etc. (do nothing)

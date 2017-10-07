@@ -1,3 +1,5 @@
+require 'json'
+
 include PostHelper
 
 class MockupsController < ShopifyApp::AuthenticatedController
@@ -23,35 +25,54 @@ class MockupsController < ShopifyApp::AuthenticatedController
       redirect_to mockups_url, notice: 'Failed to find mockup id ' + params[:id]
     end
     printful_id = mockup['printful_id']
-    printful, variants = get_variants(printful_id.to_s)
+    printful, printful_variants = get_variants(printful_id.to_s)
+
     product = ShopifyAPI::Product.new
     product.title = ""
     #product.title << printful['brand'] if printful['brand']
     #product.title << " "
     product.title << printful['model'] if printful['model']
     product.body_html = printful['description']
+
     product.variants = []
-    product.images = []
-    variants.each do |variant|
-      product.variants << ShopifyAPI::Variant.new(
-       :title                => variant['name'],
-       :price                => variant['price'],
-       :option1              => variant['size'],
-       :inventory_management => 'shopify',
-       :inventory_quantity   => 1000
-      )
-      product.images << {
-        # FIXME, we have only generated one image, we have not generated for variants
-        "src" => mockup['mockup_url']
-      }
+    groups = MockupGroup.where('mockup_id' => mockup.id)
+    groups.each do |group|
+      variant_ids = JSON.parse(group.variant_ids)
+      variant_ids.each do |variant_id|
+        variant = find_printful_variant(printful_variants, variant_id)
+        if variant == nil
+          redirect_to mockups_url, notice: "Failed to find variant id " + variant_id.to_s
+          return
+        end
+        product.variants << ShopifyAPI::Variant.new(
+         :title                => variant['name'],
+         :price                => variant['price'],
+         :option1              => variant['size'],
+         :inventory_management => 'shopify',
+         :inventory_quantity   => 1000
+        )
+      end
     end
-    response = product.save
-    if response
-      mockup.update(shopify_id: product.id)
-      redirect_to mockups_url, notice: 'Shopify product  was successfully created.'
-    else
-      redirect_to mockups_url, notice: 'Failed to create Shopify product.'
+
+    product.images = [] 
+    images = MockupImage.where('mockup_id' => mockup.id)
+    images.each do |image|
+      #variant_ids = JSON.parse(image.variant_ids)
+      #variant_ids.each do |variant_id|
+          product.images << {
+            "src" => image['image']
+          }
+      #end
     end
+
+    if !product.save
+      logger.debug "Failed to save product"
+      redirect_to :controller => '/mockups'
+      return
+    end
+
+    mockup.update(shopify_id: product.id)
+    redirect_to mockups_url, notice: 'Shopify product was successfully created.'
   end
 
   # GET /mockups/1/edit
@@ -107,5 +128,14 @@ class MockupsController < ShopifyApp::AuthenticatedController
     # Never trust parameters from the scary internet, only allow the white list through.
     def mockup_params
       params.require(:mockup).permit(:mockup_url, :placement, :variant_ids)
+    end
+
+    def find_printful_variant(variants, id)
+      variants.each do |variant|
+        if variant['id'] == id
+          return variant
+        end
+      end
+      return nil
     end
 end

@@ -7,11 +7,7 @@ module ImageHelper
   end
 
   def generate_image(name, x, y, w)
-    #logger.debug "generate_image"
-    #logger.debug name
-    #logger.debug x
-    #logger.debug y
-    #logger.debug w
+    logger.debug "generate_image(" + name + ", " + x.to_s + ", " + y.to_s + ", " + w.to_s + ")"
 
     # scaleing x,y to target / display 
     x = (w * x) / 300
@@ -48,28 +44,28 @@ module ImageHelper
 
     image.write dst
 
+    logger.debug "generate_image=" + dst
     return dst
   end
 
   private
 
   def scale_to_url_thumb(name)
-    logger.debug "scale_to_url_thumb"
-    logger.debug name
+    logger.debug "scale_to_url_thumb(" + name + ")"
 
     image = MiniMagick::Image.open(name)
     w_original= image.width.to_f
     h_original= image.height.to_f
-    logger.debug w_original
-    logger.debug h_original
+    #logger.debug w_original
+    #logger.debug h_original
 
     w = 64
     h = (h_original * w) / w_original
 
     geometry = w.to_s + "x" + h.to_i.to_s
 
-    logger.debug geometry
-    logger.debug "resizing ..."
+    #logger.debug geometry
+    #logger.debug "resizing ..."
     image.resize geometry
 
     base = file_unique1(name)     
@@ -79,7 +75,7 @@ module ImageHelper
 
     url = thumb_url + base
 
-    logger.debug url
+    logger.debug "scale_to_url_thumb= " + url
     return url
   end
 

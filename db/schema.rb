@@ -10,13 +10,33 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171005082138) do
+ActiveRecord::Schema.define(version: 20171006133358) do
 
   create_table "images", force: :cascade do |t|
     t.string "name"
     t.string "image"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "mockup_groups", force: :cascade do |t|
+    t.integer "mockup_id", limit: 8
+    t.string "variant_ids"
+    t.string "placement"
+    t.string "mockup_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["mockup_id"], name: "index_mockup_groups_on_mockup_id"
+  end
+
+  create_table "mockup_images", force: :cascade do |t|
+    t.integer "mockup_id", limit: 8
+    t.string "variant_ids"
+    t.string "image"
+    t.string "title"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["mockup_id"], name: "index_mockup_images_on_mockup_id"
   end
 
   create_table "mockups", force: :cascade do |t|

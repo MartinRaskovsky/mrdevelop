@@ -108,58 +108,95 @@ class ImagesController < ApplicationController
 
   def generate_mockup
     config.logger = Logger.new(STDOUT)
-    if has_design
-      product_id = params['product_id']
-      x = params['xpos_field'].to_i
-      y = params['ypos_field'].to_i
-      w = 1000
+    if !has_design
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]                              
+      return
+    end
 
-      vars = printfile_variants(product_id)
-      details = printfile_details(product_id, vars)
+    product_id = params['product_id']
+    x = params['xpos_field'].to_i
+    y = params['ypos_field'].to_i
+    w = 1000
+
+    vars = printfile_variants(product_id)
+    details = printfile_details(product_id, vars)
       
-      image_name = generate_image(base_image_name(params['image_id']), x, y, w)
-      if true
-        remote_image = put_img(image_name, 0)
-      else
-        remote_image = "http://martinr.com/img/barcelona/Sagrada_Familia_I_DSC_5914-m.jpg"
-      end
-      if remote_image == nil
-        redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
-        return
-      end
+    image_name = generate_image(base_image_name(params['image_id']), x, y, w)
+    if true
+      remote_image = put_img(image_name, 1)
+    else
+      remote_image = "http://martinr.com/img/barcelona/Sagrada_Familia_I_DSC_5914-m.jpg"
+    end
+    if remote_image == nil
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      return
+    end
 
-      details.each do |detail|
-        detail['printfile'].store("image_url", remote_image)
-      end
+    # TEMPORARY until each detail gets its own image
+    details.each do |detail|
+      detail['printfile'].store("image_url", remote_image)
+    end
 
-      mockups = post_mockup(product_id, details)
-      if mockups
-        mockups.each do |mockup|
-          thumb_url  =  generate_thumb(mockup["mockup_url"])
-          product_url = product_thumb(params["product_id"])
-          image_url =   image_thumb(params['image_id'])
-          args = {
-            "variant_ids" => mockup["variant_ids"].to_s,
-            "placement"   => mockup["placement"],
-            "mockup_url"  => mockup["mockup_url"],
-            "thumb_url"   => thumb_url,
-            "product_url" => product_url,
-            "image_url"   => image_url,
-            "printful_id" => params["product_id"].to_i,
-            "shopify_id"  => 0
-          }
-          @mockup = Mockup.new(args)
-          if !@mockup.save
-            debug.logger "Failed to save mockup"
+    mockups = post_mockup(product_id, details)
+    if !mockups
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      return
+    end
+
+    @mockup = Mockup.new({
+      :mockup_url  => nil,
+      :thumb_url   => generate_thumb(mockups[0]['mockup_url']),
+      :product_url => product_thumb(params['product_id']),
+      :image_url   => image_thumb(params['image_id']),
+      :printful_id => params['product_id'].to_i,
+      :shopify_id  => 0
+    })
+
+    mockups.each do |mockup|
+
+      if  mockup['extra']
+        mockup['extra'].each do |extra|
+
+          mockup_image = MockupImage.new({
+            :mockup_id   => @mockup.id,
+            :variant_ids => mockup['variant_ids'].to_s,
+            :image       => extra['url'],
+            :title       => extra['title']
+          })
+          if !mockup_image.save
+            debug.logger "Failed to save mockup_image"
+            redirect_to :controller => '/mockups'
+            return
           end
         end
-        redirect_to :controller => '/mockups'
-      else
-        redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
       end
-    else
-      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
+
+      mockup_group = MockupGroup.new({
+        :mockup_id   => @mockup.id,
+        :variant_ids => mockup['variant_ids'].to_s,
+        :placement   => mockup['placement'],
+        :mockup_url  => put_img(mockup['mockup_url'], 0),
+      })
+      if !mockup_group.save
+        debug.logger "Failed to save mockup_group"
+        redirect_to :controller => '/mockups'
+        return
+      end
+      if @mockup['mockup_url'] == nil
+        @mockup['mockup_url'] = mockup_group['mockup_url']
+      end
+
+    
     end
+
+    if !@mockup.save                                                                                       
+      debug.logger "Failed to save mockup"
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      return
+    end
+
+    redirect_to mockups_path, notice: "Successfully created mockup"
+
   end
 
   def printfile_variants(product_id)
@@ -230,7 +267,6 @@ class ImagesController < ApplicationController
       end
     end
 
-    logger.debug result
     return result
   end
 

@@ -1,0 +1,2 @@
+class MockupImage < ApplicationRecord
+end

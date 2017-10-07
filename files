@@ -42,6 +42,8 @@
 ./app/models/concerns/.keep
 ./app/models/image.rb
 ./app/models/mockup.rb
+./app/models/mockup_group.rb
+./app/models/mockup_image.rb
 ./app/models/shop.rb
 ./app/models/user.rb
 ./app/services/create_admin_service.rb
