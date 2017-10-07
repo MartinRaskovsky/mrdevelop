@@ -1,0 +1,2 @@
+rails generate model TemplateDatum product_id:integer{8}:index  title:string group:string width:integer height:integer placement:string hashdata:string area_width:integer area_height:integer area_x:integer area_y:integer safe_area_width:integer safe_area_height:integer safe_area_x:integer safe_area_y:integer order:integer file_background:string file_overlay:string
+

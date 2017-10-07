@@ -1,5 +1,6 @@
 include FileNameHelper
 include PostHelper
+include TemplateHelper
 
 class ProductController < ApplicationController
   def index
@@ -23,5 +24,17 @@ class ProductController < ApplicationController
     if !@variants
       redirect_to :controller => 'products', :action => 'index'
     end
+
+    template = get_template(@product['type'], @product['model'])
+    if template == nil
+      @overlay    = "/masks/leggings.png"
+      @background = @background
+    else
+      #@overlay    = "/exported_templates/" + template.file_overlay
+      #@background = "/exported_templates/" + template.file_background
+      @overlay    = "/masks/" + template + ".png"
+      @background = @overlay
+    end
+
   end
 end

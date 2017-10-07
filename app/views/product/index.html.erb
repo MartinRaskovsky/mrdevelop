@@ -24,9 +24,9 @@
     <td  class="product-mockup">
         <%if @design %>
           <!--%= image_tag("https://duw6wk4ou1qt.cloudfront.net/files/v529/generator/91/Capri_Leggings_mockup_generator.png", width: "300", class: "over") %--> 
-          <%= image_tag("/leggings.png", class: "over", width: "300") %>
+          <%= image_tag(@overlay, class: "over", width: "300") %>
         <% else %>
-          <%= image_tag("/leggings.png", width: "300") %>
+          <%= image_tag(@overlay, width: "300") %>
         <% end %>
         <% if @design %>
           <div id='crop-img'>

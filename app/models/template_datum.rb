@@ -1,0 +1,2 @@
+class TemplateDatum < ApplicationRecord
+end
