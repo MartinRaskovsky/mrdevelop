@@ -151,10 +151,30 @@ class ImagesController < ApplicationController
       :printful_id => params['product_id'].to_i,
       :shopify_id  => 0
     })
+    if !@mockup.save                                                                                       
+      debug.logger "Failed to save mockup"
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      return
+    end
 
     mockups.each do |mockup|
 
-      if  mockup['extra']
+      main_image = mockup['mockup_url'] #put_img(mockup['mockup_url'], 0)
+
+      # FIXME, we have only generated one image, we have not generated for others like back/label ...
+      mockup_image = MockupImage.new({
+        :mockup_id   => @mockup.id,
+        :variant_ids => "",
+        :image       => main_image,
+        :title       => ""
+      })
+      if !mockup_image.save
+        debug.logger "Failed to save main mockup_image"
+        redirect_to :controller => '/mockups'
+        return
+      end
+
+      if mockup['extra']
         mockup['extra'].each do |extra|
 
           mockup_image = MockupImage.new({
@@ -175,7 +195,7 @@ class ImagesController < ApplicationController
         :mockup_id   => @mockup.id,
         :variant_ids => mockup['variant_ids'].to_s,
         :placement   => mockup['placement'],
-        :mockup_url  => put_img(mockup['mockup_url'], 0),
+        :mockup_url  => main_image
       })
       if !mockup_group.save
         debug.logger "Failed to save mockup_group"
@@ -183,19 +203,11 @@ class ImagesController < ApplicationController
         return
       end
       if @mockup['mockup_url'] == nil
-        @mockup['mockup_url'] = mockup_group['mockup_url']
+        mockup.update(mockup_url: main_image)
       end
-
-    
     end
 
-    if !@mockup.save                                                                                       
-      debug.logger "Failed to save mockup"
-      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
-      return
-    end
-
-    redirect_to mockups_path, notice: "Successfully created mockup"
+    redirect_to mockups_path, notice: "Mockup was successfully created."
 
   end
 

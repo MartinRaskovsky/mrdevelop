@@ -17,6 +17,8 @@ module TemplateHelper
           product_title = "tank_top"
         elsif model.include? "Pencil Skirts"
           product_title = "pencil_skirts"
+        elsif model.include? "Dress"
+          product_title = "dress" 
         end
       when "FRAMED-POSTER"
         product_title = "8x10"
