@@ -30,6 +30,22 @@ module TemplateHelper
         #type=CUT-SEW; model=All-Over Cut & Sew Women's Crew Neck
         #type=CUT-SEW; model=All-Over Cut & Sew Women's V-neck
         end
+      when "T-SHIRT"
+      if model.include? "T-Shirt"
+          product_title = "t-shirt"
+        end
+      when "SUBLIMATION"
+        if model.include? "PL301"
+          product_title = "aa_pl301"
+        elsif model.include? "PL308"
+          product_title = "aa_pl308"
+        elsif model.include? "PT332"
+          product_title = "la_pt332"
+        elsif model.include? "PT301"
+          product_title = "pt301"
+        elsif model.include? "PT356"
+          product_title = "la_pt356"
+        end
       when "FRAMED-POSTER"
         product_title = "8x10"
       when "MUG"

@@ -21,12 +21,11 @@ class ImagesController < ApplicationController
     commit = params[:commit]
     if commit == "Make Design"
       make_design
-   elsif commit == "Upload Image"
-      upload_image
-   elsif commit == "Generate Mockup"
-     Delayed::Job.enqueue ImagesJobController.new(current_user, params)
-     redirect_to mockups_path, notice: "Mockup cresation is in the background."
-   else
+    elsif commit == "Upload Image"
+     upload_image
+    elsif commit == "Generate Mockup"
+      make_mockup
+    else
       url = { :controller => 'product', :action => 'index', :id => params["product_id"] }
       redirect_to url
     end
@@ -77,6 +76,13 @@ class ImagesController < ApplicationController
     return false
   end
 
+  def has_design
+    if params.has_key?(:image_id)
+      return true
+    end
+    return false
+  end
+
   def make_design
     if has_select_image
       image = params['image']
@@ -98,6 +104,35 @@ class ImagesController < ApplicationController
     else
       redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
     end
+  end
+
+  def make_mockup
+    if !has_design 
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
+      return
+    end
+
+    product = get_product(params['product_id'])
+    @mockup = Mockup.new({
+      :product_url => product['image'],
+      :image_url   => image_thumb(params['image_id']), 
+      :thumb_url   => nil,
+      :mockup_url  => nil,
+      :printful_id => params['product_id'].to_i,
+      :shopify_id  => 0
+    })
+    if !@mockup.save                                                                                       
+      logger.debug "Failed to save mockup"
+      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      return
+    end
+
+    Delayed::Job.enqueue ImagesJobController.new(current_user, params, @mockup)
+    redirect_to mockups_path, notice: "Mockup cresation is in the background."
+  end
+
+  def image_thumb(large_url)                                                                                          
+    return thumb_image_name(large_url)
   end
 
 end

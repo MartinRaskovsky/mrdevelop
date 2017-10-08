@@ -2,36 +2,23 @@ include FileNameHelper
 include ImageHelper
 include PostHelper
 
-class ImagesJobController < Struct.new(:user, :params)
+class ImagesJobController < Struct.new(:user, :params, :mockup)
+
   def perform
     self.params = params
+    @mockup = mockup
     logger = Logger.new(STDOUT)
     generate_mockup(user)
   end
 
-  def run
-    perform
-  end
-
   private
  
-  def has_design
-    if params.has_key?(:image_id)
-      return true
-    end
-    return false
-  end
-
   def generate_mockup(user)
-    if !has_design
-      #redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]
-      return
-    end
-
     product_id = params['product_id']
     x = params['xpos_field'].to_i
     y = params['ypos_field'].to_i
     w = 1000
+    mockup_url = nil
 
     vars = printfile_variants(product_id)
     details = printfile_details(product_id, vars)
@@ -54,20 +41,6 @@ class ImagesJobController < Struct.new(:user, :params)
 
     mockups = post_mockup(product_id, details)
     if !mockups
-      #redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
-      return
-    end
-
-    @mockup = Mockup.new({
-      :mockup_url  => nil,
-      :thumb_url   => generate_thumb(user, mockups[0]['mockup_url']),
-      :product_url => product_thumb(user, params['product_id']),
-      :image_url   => image_thumb(params['image_id']),
-      :printful_id => params['product_id'].to_i,
-      :shopify_id  => 0
-    })
-    if !@mockup.save                                                                                       
-      logger.debug "Failed to save mockup"
       #redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
       return
     end
@@ -117,10 +90,19 @@ class ImagesJobController < Struct.new(:user, :params)
         #redirect_to :controller => '/mockups'
         return
       end
-      if @mockup['mockup_url'] == nil
-        mockup.update(mockup_url: main_image)
+      if mockup_url == nil
+        mockup_url = main_image
       end
     end
+
+    @mockup.update({
+      #:product_url => product_thumb(user, params['product_id']),
+      #:image_url   => image_thumb(params['image_id']),
+      :thumb_url   => generate_thumb(user, mockups[0]['mockup_url']),
+      :mockup_url  => mockup_url,
+      #:printful_id => params['product_id'].to_i,
+      #:shopify_id  => 0
+    })
 
     #redirect_to mockups_path, notice: "Mockup was successfully created."
 
