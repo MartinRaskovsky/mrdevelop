@@ -10,7 +10,8 @@
       <th>Image</th>
       <th> = </th>
       <th>Mockup</th>
-      <th colspan="3"></th>
+      <th>Shopify Product</th>
+      <th></th>
     </tr>
   </thead>
 
@@ -23,14 +24,11 @@
         <td class=mockup> = </td>
         <td class=mockup><%= link_to(image_tag(mockup.thumb_url, alt: 'Mockup', width: '64'), mockup.mockup_url, target: '_blank') %></td>
         <td class=mockup>
-          <%= link_to "Create", {:controller => "mockups", :action => "new", :id => mockup.id.to_s} %>
-        </td>
-        <td class=mockup>
-        <% if mockup.shopify_id > 0 %>
-          <%= link_to 'Show', "https://la-camiseta-loca.myshopify.com/admin/products/" + mockup.shopify_id.to_s %>
-        <% else %>
-          <i>Show</i>
-        <% end %>
+          <% if mockup.shopify_id > 0 %>
+            <%= link_to 'Show', "https://la-camiseta-loca.myshopify.com/admin/products/" + mockup.shopify_id.to_s %>
+          <% else %>
+            <%= link_to "Create", {:controller => "mockups", :action => "new", :id => mockup.id.to_s} %>
+          <% end %>
         </td>
         <td class=mockup><%= link_to 'Destroy', mockup, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>

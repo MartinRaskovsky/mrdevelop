@@ -24,6 +24,7 @@
 ./app/controllers/concerns/.keep
 ./app/controllers/home_controller.rb
 ./app/controllers/images_controller.rb
+./app/controllers/images_job_controller.rb
 ./app/controllers/mockups_controller.rb
 ./app/controllers/product_controller.rb
 ./app/controllers/products_controller.rb
@@ -36,6 +37,7 @@
 ./app/helpers/post_helper.rb
 ./app/helpers/product_helper.rb
 ./app/helpers/products_helper.rb
+./app/helpers/template_helper.rb
 ./app/jobs/application_job.rb
 ./app/mailers/application_mailer.rb
 ./app/models/application_record.rb
@@ -44,7 +46,9 @@
 ./app/models/mockup.rb
 ./app/models/mockup_group.rb
 ./app/models/mockup_image.rb
+./app/models/product_template.rb
 ./app/models/shop.rb
+./app/models/template_datum.rb
 ./app/models/user.rb
 ./app/services/create_admin_service.rb
 ./app/uploaders/image_uploader.rb

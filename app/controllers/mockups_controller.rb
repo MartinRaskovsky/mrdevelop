@@ -10,7 +10,7 @@ class MockupsController < ShopifyApp::AuthenticatedController
   # GET /mockups
   # GET /mockups.json
   def index
-    @mockups = Mockup.all
+    @mockups = Mockup.order('created_at DESC')
   end
 
   # GET /mockups/1

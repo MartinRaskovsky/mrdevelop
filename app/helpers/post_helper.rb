@@ -6,14 +6,13 @@ require 'openssl'
 
 module PostHelper
 
-  def put_img(img_file, index)
-    init("put_img(" + img_file + ", " + index.to_s + ")")
+  def put_img(user, img_file, index)
+    init("put_img(" + user.id.to_s + ", " + img_file + ", " + index.to_s + ")")
 
     dst_host = "http://martinR.com"
-    dst_base = file_unique2(index, img_file)
+    dst_base = file_unique2(user, index, img_file)
     dst_url = dst_host + "/mockups/" + dst_base
     url = dst_host + "/cgi-bin/mockups.cgi"
-    #logger.debug url
 
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
@@ -52,10 +51,6 @@ module PostHelper
       return nil
     end
 
-    #logger.debug response.code
-    #logger.debug response.body
-
-    logger.debug "put_img=" + dst_url
     return dst_url
   end
 
@@ -83,7 +78,7 @@ module PostHelper
 
     variants = result['variants']
     if !variants
-      logger.debug "Failed to get variants from GET"
+      failed("Failed to get variants from GET")
       return [product, nil]
     end
 
@@ -139,31 +134,31 @@ module PostHelper
       task_key = result['task_key']
       status = result['status']
       if status != "pending"
-        logger.debug "Unexpected status: " + status
+        failed("Unexpected status: " + status)
         return nil
       end
 
       url = "http://api.printful.com/mockup-generator/task?task_key=" + task_key.to_s
 
       while status == "pending"
-        logger.debug "Sleeping 3 sec ..."
+        message("Sleeping 3 sec ...")
         sleep(3);
         result = http_get(url, ENV["PRINTFUL_KEY"])
         if result
           status = result['status']
         else
-          logger.debug "Failed to GET, trying again"
+          failed("Failed to GET, trying again")
         end
       end
 
       if status != "completed"
-        logger.debug "Unexpected status " + status
+        failed("Unexpected status " + status)
         return nil
       end
       
       mockups = result['mockups'] 
       if mockups == nil
-        logger.debug "Failed to GET mockups"
+        failed("Failed to GET mockups")
       end
 
       return mockups
@@ -173,8 +168,18 @@ module PostHelper
   private
 
   def init(who)
-    config.logger = Logger.new(STDOUT)
+    logger = Logger.new(STDOUT)
     logger.debug who
+  end
+
+  def failed(why)
+    logger = Logger.new(STDOUT)
+    logger.debug why
+  end
+
+  def message(what)
+    logger = Logger.new(STDOUT)
+    logger.debug what
   end
 
   def validate_content(content)
@@ -201,10 +206,9 @@ module PostHelper
     end
 
     if !content.body
-      logger.debug "Failed to GET content"
+      failed("Failed to GET content")
     end
 
-    #logger.debug content.body
     return content.body
   end
 
@@ -212,14 +216,14 @@ module PostHelper
     response  = JSON.parse content
     code = response['code']
     if code != 200
-      logger.debug response['result'] if response['result']
-      logger.debug "code=" + code.to_s if code
+      failed(response['result']) if response['result']
+      failed("code=" + code.to_s) if code
       return nil
     end
 
     result = response['result']
     if result == nil
-      logger.debug "Failed to GET result"
+      failed("Failed to GET result")
     end
 
     return result
@@ -227,23 +231,23 @@ module PostHelper
 
   def validate_product(result, id)
     if !result
-      logger.debug "Failed to get result from GET"
+      failed("Failed to get result from GET")
       return nil
     end
 
     product = result['product']
     if !product
-      logger.debug "Failed to get product from GET"
+      failed("Failed to get product from GET")
       return nil
     end
 
     if !product['id']
-      logger.debug "Failed to get product id from GET"
+      failed("Failed to get product id from GET")
       return nil
     end
 
     if product['id'] != id.to_i
-      logger.debug "Failed to get product id: " + id + " from GET, got: " + product['id'].to_s + " instead"
+      failed("Failed to get product id: " + id + " from GET, got: " + product['id'].to_s + " instead")
       return nil
     end
 
@@ -252,19 +256,19 @@ module PostHelper
 
   def validate_product_id(result, id)                                                                                          
     if !result
-      logger.debug "Failed to get result from GET"
+      failed("Failed to get result from GET")
       return nil
     end
 
     product_id = result['product_id']
 
     if !product_id
-      logger.debug "Failed to get product id from GET"
+      failed("Failed to get product id from GET")
       return nil
     end
 
     if product_id != id.to_i
-      logger.debug "Failed to get product id: " + id + " from GET, got: " + product_id.to_s + " instead"
+      failed("Failed to get product id: " + id + " from GET, got: " + product_id.to_s + " instead")
       return nil
     end
 
@@ -329,8 +333,8 @@ module PostHelper
     return validate_result(content)
   end
 
-  def file_unique2(index, name)
-    name = current_user.id.to_s + "/" + Time.now.to_i.to_s + "_" + index.to_s + "_" + File.basename(name)
+  def file_unique2(user, index, name)
+    name = user.id.to_s + "/" + Time.now.to_i.to_s + "_" + index.to_s + "_" + File.basename(name)
     name = name.downcase
     return name
   end
@@ -349,7 +353,7 @@ module PostHelper
     begin
       attempt_count += 1
       if attempt_count > 1
-        logger.debug "attempt ##{attempt_count}"
+        message("Attempt ##{attempt_count}")
       end
       response = http.request(request)
     rescue OpenURI::HTTPError => e
@@ -357,7 +361,7 @@ module PostHelper
       flash[:notice] = "Error: #{e}"
     rescue SocketError, Net::ReadTimeout => e
       # server can't be reached or doesn't send any respones
-      logger.debug "Error: #{e}"
+      failed("Error: #{e}")
       sleep 3
       retry if attempt_count < max_attempts
       flash[:notice] = "Server can't be reached or doesn't send any respones - Error: #{e}" 

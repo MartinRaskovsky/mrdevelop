@@ -99,3 +99,5 @@ gem "fog"
 
 gem 'binding_of_caller'
 
+gem 'delayed_job_active_record'
+

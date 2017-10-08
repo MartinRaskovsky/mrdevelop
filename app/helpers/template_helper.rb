@@ -18,7 +18,17 @@ module TemplateHelper
         elsif model.include? "Pencil Skirts"
           product_title = "pencil_skirts"
         elsif model.include? "Dress"
-          product_title = "dress" 
+          product_title = "dress"
+        elsif model.include? "Rectangular Pillow"
+          product_title = "rectangular_pillow"
+        elsif model.include? "Square Pillow"
+          product_title = "square_pillow"
+        elsif model.include? "All-Over Tote"
+          product_title = "all_over_tote"
+        elsif model.include? "Drawstring Bag"
+          product_title = "drawstring_bag"
+        #type=CUT-SEW; model=All-Over Cut & Sew Women's Crew Neck
+        #type=CUT-SEW; model=All-Over Cut & Sew Women's V-neck
         end
       when "FRAMED-POSTER"
         product_title = "8x10"
@@ -27,7 +37,7 @@ module TemplateHelper
     end
     
     if !product_title
-      #config.logger = Logger.new(STDOUT)
+      config.logger = Logger.new(STDOUT)
       logger.debug "type=" + type + "; model=" + model
       return nil
     end
