@@ -2,18 +2,31 @@ include FileNameHelper
 include ImageHelper
 include PostHelper
 
-class ImagesJobController < Struct.new(:user, :params, :mockup)
+#class ImagesJobController < Struct.new(:user, :params, :mockup)
+class ImagesJobController < ProgressJob::Base
+  @user
+  @params
+  @mockup
 
-  def perform
-    self.params = params
+  def initialize(user, params, mockup)
+    @user = user
+    @params = params
     @mockup = mockup
     logger = Logger.new(STDOUT)
-    generate_mockup(user)
+    super progress_max: 6
+  end
+
+  def perform
+    update_stage('Generating gockup')
+    #self.params = params
+    #@mockup = mockup
+    #logger = Logger.new(STDOUT)
+    generate_mockup(@user, @params)
   end
 
   private
  
-  def generate_mockup(user)
+  def generate_mockup(user, params)
     product_id = params['product_id']
     x = params['xpos_field'].to_i
     y = params['ypos_field'].to_i
@@ -21,16 +34,19 @@ class ImagesJobController < Struct.new(:user, :params, :mockup)
     mockup_url = nil
 
     vars = printfile_variants(product_id)
+    update_progress
+
     details = printfile_details(product_id, vars)
+    update_progress
       
     image_name = generate_image(user, base_image_name(params['image_id']), x, y, w)
-    if true
-      remote_image = put_img(user,  image_name, 1)
-    else
-      remote_image = "http://martinr.com/img/barcelona/Sagrada_Familia_I_DSC_5914-m.jpg"
-    end
+    update_progress
+
+    remote_image = put_img(user,  image_name, 1)
+    update_progress
+
     if remote_image == nil
-      #redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      logger.debug "Failed to create remote image"
       return
     end
 
@@ -40,8 +56,10 @@ class ImagesJobController < Struct.new(:user, :params, :mockup)
     end
 
     mockups = post_mockup(product_id, details)
+    update_progress
+
     if !mockups
-      #redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+      logger.debug "Failed to create mockups"
       return
     end
 
@@ -58,7 +76,6 @@ class ImagesJobController < Struct.new(:user, :params, :mockup)
       })
       if !mockup_image.save
         logger.debug "Failed to save main mockup_image"
-        #redirect_to :controller => '/mockups'
         return
       end
 
@@ -73,7 +90,6 @@ class ImagesJobController < Struct.new(:user, :params, :mockup)
           })
           if !mockup_image.save
             logger.debug "Failed to save mockup_image"
-            #redirect_to :controller => '/mockups'
             return
           end
         end
@@ -87,7 +103,6 @@ class ImagesJobController < Struct.new(:user, :params, :mockup)
       })
       if !mockup_group.save
         logger.debug "Failed to save mockup_group"
-        #redirect_to :controller => '/mockups'
         return
       end
       if mockup_url == nil
@@ -100,12 +115,12 @@ class ImagesJobController < Struct.new(:user, :params, :mockup)
       #:image_url   => image_thumb(params['image_id']),
       :thumb_url   => generate_thumb(user, mockups[0]['mockup_url']),
       :mockup_url  => mockup_url,
+      #:job_id      => 0
       #:printful_id => params['product_id'].to_i,
       #:shopify_id  => 0
     })
 
-    #redirect_to mockups_path, notice: "Mockup was successfully created."
-
+    update_progress
   end
 
   def printfile_variants(product_id)

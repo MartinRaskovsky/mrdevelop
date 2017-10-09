@@ -16,7 +16,13 @@
   </thead>
 
   <tbody>
-    <% @mockups.each do |mockup| %>
+    <% progress = false %>
+    <% @mockups.each_with_index do |mockup,i| %>
+      <% job_id = mockup.job_id %>
+      <% mockup_id = mockup.id %>
+      <% if !mockup.thumb_url && job_id && job_id > 0 %>
+        <% progress = true %>
+      <% end %>
       <tr>
         <td class=mockup><%= image_tag(mockup.product_url, alt: 'Product', width: '64') %></td>
         <td class=mockup> + </td>
@@ -32,12 +38,32 @@
             <% end %>
           </td>
         <% else %>
-          <td class=mockup></td>
-          <td class=mockup></td>
-          <td class=mockup></td>
+          <td class=mockup colspan=3>
+          <% if job_id && job_id > 0 %>
+            <div id="mrprogressbar"><div id="mrprogress" ><div id="mrpbaranim"></div></div></div>
+          <% end %>
+          </td>
         <% end %> 
         <td class=mockup><%= link_to 'Destroy', mockup, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
+    <% end %>
+    <% if progress %>
+      <script type="text/javascript">
+        var interval;
+        interval = setInterval(function(){
+          $.ajax({
+            url: '/mockups/status/0',
+            success: function(){
+              //alert("SUCCESS");
+            },
+            error: function(){
+              clearInterval(interval);
+              //alert("ERROR");
+              location.reload(false);
+            }
+          })
+        },5000);
+      </script>
     <% end %>
   </tbody>
 </table>

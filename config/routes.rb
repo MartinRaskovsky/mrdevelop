@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
+
   resources :mockups
+
   resources :product do
     resources :index
   end
@@ -14,4 +16,6 @@ Rails.application.routes.draw do
   mount ShopifyApp::Engine, at: '/'
   get "/shopify" => 'home#index'
   get "/mockups/new/:id" => 'mockups#index'
+  get "/mockups/generate/:id" => 'mockups#generate'
+  get "/mockups/status/:id" => 'mockups#status'
 end

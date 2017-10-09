@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171008005536) do
+ActiveRecord::Schema.define(version: 20171009130625) do
 
   create_table "delayed_jobs", force: :cascade do |t|
     t.integer "priority", default: 0, null: false
@@ -24,6 +24,9 @@ ActiveRecord::Schema.define(version: 20171008005536) do
     t.string "queue"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string "progress_stage"
+    t.integer "progress_current", default: 0
+    t.integer "progress_max", default: 0
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
@@ -65,6 +68,7 @@ ActiveRecord::Schema.define(version: 20171008005536) do
     t.integer "shopify_id", limit: 8
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "job_id"
   end
 
   create_table "shops", force: :cascade do |t|

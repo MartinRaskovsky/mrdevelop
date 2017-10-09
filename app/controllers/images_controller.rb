@@ -1,6 +1,6 @@
 include FileNameHelper
 #include ImageHelper
-#include PostHelper
+include PostHelper
 
 class ImagesController < ApplicationController
   before_action :set_image, only: [:show, :edit, :update]
@@ -112,26 +112,29 @@ class ImagesController < ApplicationController
       return
     end
 
-    product = get_product(params['product_id'])
-    @mockup = Mockup.new({
-      :product_url => product['image'],
-      :image_url   => image_thumb(params['image_id']), 
-      :thumb_url   => nil,
-      :mockup_url  => nil,
-      :printful_id => params['product_id'].to_i,
-      :shopify_id  => 0
-    })
-    if !@mockup.save                                                                                       
-      logger.debug "Failed to save mockup"
-      redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
-      return
-    end
+    redirect_to :controller => 'mockups', :action => 'generate', :id => params["product_id"], :image_id => params['image_id']
+    #product = get_product(params['product_id'])
+    #@mockup = Mockup.new({
+    #  :product_url => product['image'],
+    #  :image_url   => image_thumb(params['image_id']), 
+    #  :thumb_url   => nil,
+    #  :mockup_url  => nil,
+    #  :printful_id => params['product_id'].to_i,
+    #  :shopify_id  => 0
+    #})
 
-    Delayed::Job.enqueue ImagesJobController.new(current_user, params, @mockup)
-    redirect_to mockups_path, notice: "Mockup cresation is in the background."
+    #config.logger = Logger.new(STDOUT)
+    #if !@mockup.save                                                                                       
+    #  logger.debug "Failed to save mockup"
+    #  redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
+    #  return
+    #end
+
+    #job = Delayed::Job.enqueue ImagesJobController.new(current_user, params, @mockup)
+    #redirect_to mockups_path, notice: "Mockup creation is in the background with ID=" + job.id.to_s
   end
 
-  def image_thumb(large_url)                                                                                          
+  def image_thumb(large_url)
     return thumb_image_name(large_url)
   end
 

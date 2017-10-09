@@ -1,5 +1,6 @@
 require 'json'
 
+include FileNameHelper                                                                                            
 include PostHelper
 
 class MockupsController < ShopifyApp::AuthenticatedController
@@ -16,6 +17,70 @@ class MockupsController < ShopifyApp::AuthenticatedController
   # GET /mockups/1
   # GET /mockups/1.json
   def show
+  end
+
+  # GET /status
+  def status
+    config.logger = Logger.new(STDOUT)
+    logger.debug "STATUS"
+
+    @mockups = Mockup.order('created_at DESC') if @mockups == nil
+
+    all_done = true
+    @mockups.each do |mockup|
+      job_id = mockup.job_id
+      if job_id && job_id > 0
+        all_done = false
+        job = DelayedJob.find_by_id(job_id)
+        logger.debug "job_id=" + job_id.to_s
+        if job == nil
+          logger.debug "REDIRECTING ================================="
+          mockup.update({"job_id" => 0})
+          render nothing: true, status: 403
+          return
+        end
+      end
+    end
+
+    if all_done
+      render nothing: true, status: 403
+      return
+    end
+
+    render json: { :success => true }
+  end
+
+  # GET /mockups/generate
+  def generate
+    config.logger = Logger.new(STDOUT)
+
+    product_id = params[:id]
+    image_id = params['image_id']
+    params['product_id'] = product_id
+
+
+    product = get_product(product_id)
+    @mockup = Mockup.new({
+      :product_url => product['image'],
+      :image_url   => image_thumb(image_id), 
+      :thumb_url   => nil,
+      :mockup_url  => nil,
+      :printful_id => product_id.to_i,
+      :shopify_id  => 0,
+      :job_id      => 0
+    })
+
+    if !@mockup.save                                                                                       
+      logger.debug "Failed to save mockup"
+      redirect_to :controller => 'product', :action => 'index', :id => product_id, :image_id => image_id
+      return
+    end
+
+    @job = Delayed::Job.enqueue ImagesJobController.new(current_user, params, @mockup)
+    logger.debug @job.to_s
+    
+    @mockup.update({:job_id => @job.id})
+    redirect_to mockups_path, notice: "Mockup creation is in the background with ID=" + @job.id.to_s
   end
 
   # GET /mockups/new
@@ -137,6 +202,10 @@ class MockupsController < ShopifyApp::AuthenticatedController
       end
     end
     return nil
+  end
+
+  def image_thumb(large_url)
+    return thumb_image_name(large_url)
   end
 
 end
