@@ -48,8 +48,16 @@ module TemplateHelper
         end
       when "FRAMED-POSTER"
         product_title = "8x10"
+      when "POSTER"
+        if model.include? "Photo Paper Poster"
+          return "8x10"
+        end
       when "MUG"
         product_title = "11oz"
+      when "CANVAS"
+        if model.include? "Canvas"
+          product_title = "12x12"
+        end
     end
     
     if !product_title

@@ -66,8 +66,7 @@ class MockupsController < ShopifyApp::AuthenticatedController
     end
 
     if !product.save
-      logger.debug "Failed to save product"
-      redirect_to :controller => '/mockups'
+      redirect_to mockups_url, notice: 'Failed to save product.'
       return
     end
 
@@ -120,22 +119,25 @@ class MockupsController < ShopifyApp::AuthenticatedController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_mockup
-      @mockup = Mockup.find(params[:id])
-    end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def mockup_params
-      params.require(:mockup).permit(:mockup_url, :placement, :variant_ids)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_mockup
+    @mockup = Mockup.find(params[:id])
+  end
 
-    def find_printful_variant(variants, id)
-      variants.each do |variant|
-        if variant['id'] == id
-          return variant
-        end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def mockup_params
+    params.require(:mockup).permit(:mockup_url, :placement, :variant_ids)
+  end
+
+  def find_printful_variant(variants, id)
+    variants.each do |variant|
+      if variant['id'] == id
+        return variant
       end
-      return nil
     end
+    return nil
+  end
+
 end
+

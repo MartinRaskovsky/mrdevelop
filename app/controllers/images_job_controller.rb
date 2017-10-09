@@ -183,12 +183,12 @@ class ImagesJobController < Struct.new(:user, :params, :mockup)
     return scale_to_url_thumb(user, mockup_url);
   end
 
-  def product_thumb(user, product_id)
-    product = get_product(product_id)
-    return scale_to_url_thumb(user, product['image']);
-  end
+  #def product_thumb(user, product_id)
+  #  product = get_product(product_id)
+  #  return scale_to_url_thumb(user, product['image']);
+  #end
 
-  def image_thumb(large_url)
-    return thumb_image_name(large_url)
-  end
+  #def image_thumb(large_url)
+  #  return thumb_image_name(large_url)
+  #end
 end
