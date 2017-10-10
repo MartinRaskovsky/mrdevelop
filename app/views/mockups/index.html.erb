@@ -5,13 +5,14 @@
 <table>
   <thead>
     <tr>
+      <th></th>
       <th>Product</th>
       <th> + </th>
       <th>Image</th>
       <th> = </th>
       <th>Mockup</th>
       <th>Shopify Product</th>
-      <th></th>
+      <th>Shopify Order</th>
     </tr>
   </thead>
 
@@ -24,27 +25,37 @@
         <% progress = true %>
       <% end %>
       <tr>
+        <td class=mockup><%= link_to(image_tag("/trash16.png", alt: 'trash', width: '16'),
+                                     mockup, method: :delete, data: { confirm: 'Are you sure?' }) %></td>
         <td class=mockup><%= image_tag(mockup.product_url, alt: 'Product', width: '64') %></td>
         <td class=mockup> + </td>
         <td class=mockup><%= image_tag(mockup.image_url, alt: 'Image', width: '64') %></td>
         <% if mockup.thumb_url %>
           <td class=mockup> = </td>
-          <td class=mockup><%= link_to(image_tag(mockup.thumb_url, alt: 'Mockup', width: '64'), mockup.mockup_url, target: '_blank') %></td>
+          <td class=mockup><%= link_to(image_tag(mockup.thumb_url, alt: 'Mockup', width: '64'),
+                               mockup.mockup_url, target: '_blank') %></td>
           <td class=mockup>
             <% if mockup.shopify_id > 0 %>
               <%= link_to 'Show', "https://la-camiseta-loca.myshopify.com/admin/products/" + mockup.shopify_id.to_s %>
             <% else %>
               <%= link_to "Create", {:controller => "mockups", :action => "new", :id => mockup.id.to_s} %>
             <% end %>
+          <td class=mockup>
+            <% if mockup.shopify_id > 0 %>
+              <% if mockup.order_status_url %>
+                <%= link_to 'Show', mockup.order_status_url %>
+              <% else %>
+                <%= link_to 'Order', {:controller => "mockups", :action => "order", :id => mockup.id.to_s} %>
+              <% end %>
+            <% end %>
           </td>
         <% else %>
-          <td class=mockup colspan=3>
+          <td class=mockup colspan=4>
           <% if job_id && job_id > 0 %>
             <div id="progress"><div id="pbaranim"></div></div>
           <% end %>
           </td>
         <% end %> 
-        <td class=mockup><%= link_to 'Destroy', mockup, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
     <% if progress %>

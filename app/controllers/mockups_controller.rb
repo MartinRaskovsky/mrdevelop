@@ -21,9 +21,6 @@ class MockupsController < ShopifyApp::AuthenticatedController
 
   # GET /status
   def status
-    config.logger = Logger.new(STDOUT)
-    logger.debug "STATUS"
-
     @mockups = Mockup.order('created_at DESC') if @mockups == nil
 
     all_done = true
@@ -32,10 +29,8 @@ class MockupsController < ShopifyApp::AuthenticatedController
       if job_id && job_id > 0
         all_done = false
         job = DelayedJob.find_by_id(job_id)
-        logger.debug "job_id=" + job_id.to_s
         if job == nil
-          logger.debug "REDIRECTING ================================="
-          mockup.update({"job_id" => 0})
+          mockup.update({:job_id => 0})
           render nothing: true, status: 403
           return
         end
@@ -77,7 +72,6 @@ class MockupsController < ShopifyApp::AuthenticatedController
     end
 
     @job = Delayed::Job.enqueue MockupJob.new(current_user, params, @mockup)
-    logger.debug @job.to_s
     
     @mockup.update({:job_id => @job.id})
     redirect_to mockups_path, notice: "Mockup creation is in the background"
@@ -88,6 +82,7 @@ class MockupsController < ShopifyApp::AuthenticatedController
     mockup = Mockup.find(params[:id])
     if !mockup
       redirect_to mockups_url, notice: 'Failed to find mockup id ' + params[:id]
+      return
     end
     printful_id = mockup['printful_id']
     printful, printful_variants = get_variants(printful_id.to_s)
@@ -135,8 +130,58 @@ class MockupsController < ShopifyApp::AuthenticatedController
       return
     end
 
-    mockup.update(shopify_id: product.id)
+    mockup.update({:shopify_id => product.id})  
     redirect_to mockups_url, notice: 'Shopify product was successfully created.'
+  end
+
+  # GET /mockups/order
+  def order
+    config.logger = Logger.new(STDOUT)                                                                                       
+
+    mockup = Mockup.find(params[:id])
+    if !mockup
+      redirect_to mockups_url, notice: 'Failed to find mockup id ' + params[:id]
+      return
+    end
+
+    shopify_id = mockup.shopify_id
+    product = ShopifyAPI::Product.find(shopify_id)
+    if !product
+      redirect_to mockups_url, notice: 'Failed to find associated Shopify product'
+      return
+    end
+
+    line_items = []
+    product.variants.each do |variant|
+      line_items << ShopifyAPI::LineItem.new(
+          :quantity      => 1,
+          :variant_id    => variant.id
+      )
+    end
+
+    customer = ShopifyAPI::Customer.new(
+      :email         => current_user.email,
+      :first_name    => current_user.name
+    )
+
+    ShopifyAPI::LineItem.new
+    order = ShopifyAPI::Order.new(
+      :line_items    => line_items,
+      :email         => "martinr6969@gmail.com",
+      :customer      => customer
+    )
+
+    #logger.debug order.to_json
+
+    if !order.save
+      redirect_to mockups_url, notice: 'Failed to save order.'
+      return
+    end
+    logger.debug order.to_json
+
+    mockup.update({:order_status_url => order.order_status_url}) 
+
+    redirect_to mockups_url, notice: 'Product was successfully ordered.'
   end
 
   # GET /mockups/1/edit

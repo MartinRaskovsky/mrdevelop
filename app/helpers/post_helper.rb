@@ -319,7 +319,7 @@ module PostHelper
 
     request = Net::HTTP::Post.new(uri)
     request["content-type"] = 'application/json'
-    request["authorization"] = "Basic " + auth_key
+    request["authorization"] = "Basic " + auth_key if auth_key
     request.body = text
 
     # Send the request
