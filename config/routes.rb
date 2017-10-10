@@ -8,7 +8,6 @@ Rails.application.routes.draw do
 
   get '/products' => 'products#index'
 
-  resources :x_users
   root to: 'mockups#index'
   devise_for :users
   resources :users
