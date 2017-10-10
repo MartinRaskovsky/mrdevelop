@@ -164,7 +164,6 @@ class MockupsController < ShopifyApp::AuthenticatedController
       :first_name    => current_user.name
     )
 
-    ShopifyAPI::LineItem.new
     order = ShopifyAPI::Order.new(
       :line_items    => line_items,
       :email         => "martinr6969@gmail.com",
