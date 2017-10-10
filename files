@@ -42,6 +42,7 @@
 ./app/mailers/application_mailer.rb
 ./app/models/application_record.rb
 ./app/models/concerns/.keep
+./app/models/delayed_job.rb
 ./app/models/image.rb
 ./app/models/mockup.rb
 ./app/models/mockup_group.rb
@@ -125,7 +126,6 @@
 ./package.json
 ./Rakefile
 ./README
-./time.stamp
 ./vendor/.keep
 ./vendor/assets/javascripts/.keep
 ./vendor/assets/stylesheets/.keep

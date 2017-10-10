@@ -1,5 +1,4 @@
 include FileNameHelper
-#include ImageHelper
 include PostHelper
 
 class ImagesController < ApplicationController
@@ -113,25 +112,6 @@ class ImagesController < ApplicationController
     end
 
     redirect_to :controller => 'mockups', :action => 'generate', :id => params["product_id"], :image_id => params['image_id']
-    #product = get_product(params['product_id'])
-    #@mockup = Mockup.new({
-    #  :product_url => product['image'],
-    #  :image_url   => image_thumb(params['image_id']), 
-    #  :thumb_url   => nil,
-    #  :mockup_url  => nil,
-    #  :printful_id => params['product_id'].to_i,
-    #  :shopify_id  => 0
-    #})
-
-    #config.logger = Logger.new(STDOUT)
-    #if !@mockup.save                                                                                       
-    #  logger.debug "Failed to save mockup"
-    #  redirect_to :controller => 'product', :action => 'index', :id => params["product_id"], :image_id => params[:image_id]
-    #  return
-    #end
-
-    #job = Delayed::Job.enqueue ImagesJobController.new(current_user, params, @mockup)
-    #redirect_to mockups_path, notice: "Mockup creation is in the background with ID=" + job.id.to_s
   end
 
   def image_thumb(large_url)

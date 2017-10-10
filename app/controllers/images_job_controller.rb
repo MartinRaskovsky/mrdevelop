@@ -2,8 +2,7 @@ include FileNameHelper
 include ImageHelper
 include PostHelper
 
-#class ImagesJobController < Struct.new(:user, :params, :mockup)
-class ImagesJobController < ProgressJob::Base
+class ImagesJobController
   @user
   @params
   @mockup
@@ -13,14 +12,9 @@ class ImagesJobController < ProgressJob::Base
     @params = params
     @mockup = mockup
     logger = Logger.new(STDOUT)
-    super progress_max: 6
   end
 
   def perform
-    update_stage('Generating gockup')
-    #self.params = params
-    #@mockup = mockup
-    #logger = Logger.new(STDOUT)
     generate_mockup(@user, @params)
   end
 
@@ -34,16 +28,12 @@ class ImagesJobController < ProgressJob::Base
     mockup_url = nil
 
     vars = printfile_variants(product_id)
-    update_progress
 
     details = printfile_details(product_id, vars)
-    update_progress
       
     image_name = generate_image(user, base_image_name(params['image_id']), x, y, w)
-    update_progress
 
     remote_image = put_img(user,  image_name, 1)
-    update_progress
 
     if remote_image == nil
       logger.debug "Failed to create remote image"
@@ -56,7 +46,6 @@ class ImagesJobController < ProgressJob::Base
     end
 
     mockups = post_mockup(product_id, details)
-    update_progress
 
     if !mockups
       logger.debug "Failed to create mockups"
@@ -120,7 +109,6 @@ class ImagesJobController < ProgressJob::Base
       #:shopify_id  => 0
     })
 
-    update_progress
   end
 
   def printfile_variants(product_id)
