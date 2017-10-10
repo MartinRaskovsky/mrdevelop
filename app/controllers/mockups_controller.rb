@@ -76,11 +76,11 @@ class MockupsController < ShopifyApp::AuthenticatedController
       return
     end
 
-    @job = Delayed::Job.enqueue ImagesJobController.new(current_user, params, @mockup)
+    @job = Delayed::Job.enqueue MockupJob.new(current_user, params, @mockup)
     logger.debug @job.to_s
     
     @mockup.update({:job_id => @job.id})
-    redirect_to mockups_path, notice: "Mockup creation is in the background with ID=" + @job.id.to_s
+    redirect_to mockups_path, notice: "Mockup creation is in the background"
   end
 
   # GET /mockups/new

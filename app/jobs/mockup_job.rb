@@ -2,7 +2,7 @@ include FileNameHelper
 include ImageHelper
 include PostHelper
 
-class ImagesJobController
+class MockupJob
   @user
   @params
   @mockup
