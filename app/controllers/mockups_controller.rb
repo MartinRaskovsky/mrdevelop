@@ -54,8 +54,8 @@ class MockupsController < ShopifyApp::AuthenticatedController
     image_id = params['image_id']
     params['product_id'] = product_id
 
-
     product = get_product(product_id)
+
     @mockup = Mockup.new({
       :product_url => product['image'],
       :image_url   => image_thumb(image_id), 
@@ -63,7 +63,8 @@ class MockupsController < ShopifyApp::AuthenticatedController
       :mockup_url  => nil,
       :printful_id => product_id.to_i,
       :shopify_id  => 0,
-      :job_id      => 0
+      :job_id      => 0,
+      :cart        => nil
     })
 
     if !@mockup.save                                                                                       
@@ -80,6 +81,8 @@ class MockupsController < ShopifyApp::AuthenticatedController
 
   # GET /mockups/new
   def new
+    config.logger = Logger.new(STDOUT) 
+
     mockup = Mockup.find(params[:id])
     if !mockup
       redirect_to mockups_url, notice: 'Failed to find mockup id ' + params[:id]
@@ -131,7 +134,9 @@ class MockupsController < ShopifyApp::AuthenticatedController
       return
     end
 
-    mockup.update({:shopify_id => product.id})  
+    cart = get_cart(product)
+
+    mockup.update({:shopify_id => product.id, :cart => cart})  
     redirect_to mockups_url, notice: 'Shopify product was successfully created.'
   end
 
@@ -171,13 +176,10 @@ class MockupsController < ShopifyApp::AuthenticatedController
       :customer      => customer
     )
 
-    #logger.debug order.to_json
-
     if !order.save
       redirect_to mockups_url, notice: 'Failed to save order.'
       return
     end
-    logger.debug order.to_json
 
     mockup.update({:order_status_url => order.order_status_url}) 
 
@@ -259,5 +261,22 @@ class MockupsController < ShopifyApp::AuthenticatedController
     return thumb_image_name(large_url)
   end
 
-end
+  def get_cart(product)
+    carts = ""
+    product.variants.each do |variant|
+      if carts.length > 0
+        carts << ","
+      end
+      carts << variant.id.to_s + ":1"
+    end
 
+    if carts.length == 0
+      return nil
+    end
+
+    cart = "http://la-camiseta-loca.myshopify.com/cart/" + carts
+
+    return cart
+  end
+
+end

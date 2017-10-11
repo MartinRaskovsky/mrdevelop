@@ -104,6 +104,7 @@ module PostHelper
     url = "https://api.printful.com/mockup-generator/create-task/" + product_id
 
     # TEMPORARY process each request sequentially
+    # ACTUALLY ONLY THE FIRST ONE IS PROCESSED, LOOK AT THE EARLY return
     details.each do |detail|
       text = []
       text << '{'

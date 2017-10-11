@@ -21,6 +21,7 @@ class MockupJob
   private
  
   def generate_mockup(user, params)
+    logger = Logger.new(STDOUT)
     product_id = params['product_id']
     x = params['xpos_field'].to_i
     y = params['ypos_field'].to_i
@@ -30,9 +31,8 @@ class MockupJob
     vars = printfile_variants(product_id)
 
     details = printfile_details(product_id, vars)
-      
-    image_name = generate_image(user, base_image_name(params['image_id']), x, y, w)
 
+    image_name = generate_image(user, base_image_name(params['image_id']), x, y, w)
     remote_image = put_img(user,  image_name, 1)
 
     if remote_image == nil
@@ -104,9 +104,10 @@ class MockupJob
       #:image_url   => image_thumb(params['image_id']),
       :thumb_url   => generate_thumb(user, mockups[0]['mockup_url']),
       :mockup_url  => mockup_url,
-      #:job_id      => 0
+      #:job_id      => 0,
       #:printful_id => params['product_id'].to_i,
-      #:shopify_id  => 0
+      #:shopify_id  => 0,
+      #:cart        => nil
     })
 
   end
@@ -118,6 +119,7 @@ class MockupJob
     end
 
     if variants.length > 1
+      # TEMPORARY, since we dont have variant choice at GUI level, we choose the first two
       return [ variants[0]['id'], variants[1]['id'] ]
     end
 
@@ -170,7 +172,7 @@ class MockupJob
         if detail
           detail["variants"] << var_id
         else
-          # TEMPORARY generated only for FIRTS placement
+          # TEMPORARY generated only for FIRST placement
           placement_id = placements.values[0]
           printfile = find_printfile(printfiles, placement_id)
           add = { "variants" => [ var_id ], 'placements' => placements, "printfile" => printfile }
@@ -194,4 +196,5 @@ class MockupJob
   #def image_thumb(large_url)
   #  return thumb_image_name(large_url)
   #end
+
 end

@@ -12,6 +12,7 @@
       <th> = </th>
       <th>Mockup</th>
       <th>Shopify Product</th>
+      <th>Shopify Cart</th>
       <th>Shopify Order</th>
     </tr>
   </thead>
@@ -41,7 +42,12 @@
               <%= link_to "Create", {:controller => "mockups", :action => "new", :id => mockup.id.to_s} %>
             <% end %>
           <td class=mockup>
-            <% if mockup.shopify_id > 0 %>
+            <% if mockup.shopify_id > 0 && mockup.cart %>
+              <%= link_to 'Cart', mockup.cart %>
+            <% end %>
+          </td>
+          <td class=mockup>
+            <% if mockup.shopify_id > 0 %>                                                                                   
               <% if mockup.order_status_url %>
                 <%= link_to 'Show', mockup.order_status_url %>
               <% else %>
@@ -50,7 +56,7 @@
             <% end %>
           </td>
         <% else %>
-          <td class=mockup colspan=4>
+          <td class=mockup colspan=5>
           <% if job_id && job_id > 0 %>
             <div id="progress"><div id="pbaranim"></div></div>
           <% end %>
