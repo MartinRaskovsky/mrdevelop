@@ -49,10 +49,15 @@ class MockupsController < ShopifyApp::AuthenticatedController
 
   # GET /mockups/generate
   def generate
-    if !run_mockup(true, params)
+    if !run_mockup(params)
       redirect_to :controller => 'product', :action => 'index', :id => product_id, :image_id => image_id
       return
     end
+
+    #if !make_printfiles(params)
+    #  redirect_to :controller => 'product', :action => 'index', :id => product_id, :image_id => image_id
+    #  return
+    #end
 
     redirect_to mockups_path, notice: "Mockup creation is in the background"
   end

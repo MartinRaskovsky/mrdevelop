@@ -6,32 +6,26 @@ class MockupJob
   @user
   @params
   @mockup
-  @is_mockup
 
-  def initialize(user, params, mockup, is_mockup)
+  def initialize(user, params, mockup)
     @user = user
     @params = params
     @mockup = mockup
-    @is_mockup = is_mockup
     logger = Logger.new(STDOUT)
   end
 
   def perform
-    generate_mockup(@user, @params, @is_mockup)
+    generate_mockup(@user, @params)
   end
 
   private
  
-  def generate_mockup(user, params, is_mockup)
+  def generate_mockup(user, params)
     logger = Logger.new(STDOUT)
     product_id = params['product_id']
     x = params['xpos_field'].to_i
     y = params['ypos_field'].to_i
-    if is_mockup
-      w = 1000
-    else
-      w = 0
-    end
+    w = 1000
     mockup_url = nil
 
     vars = printfile_variants(product_id)
@@ -60,11 +54,7 @@ class MockupJob
 
     mockups.each do |mockup|
 
-      if is_mockup
-        main_image = mockup['mockup_url']
-      else
-        main_image = put_img(user, mockup['mockup_url'], 0)
-      end
+      main_image = mockup['mockup_url']
 
       # FIXME, we have only generated one image, we have not generated for others like back/label ...
       mockup_image = MockupImage.new({

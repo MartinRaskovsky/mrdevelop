@@ -40,6 +40,7 @@
 ./app/helpers/template_helper.rb
 ./app/jobs/application_job.rb
 ./app/jobs/mockup_job.rb
+./app/jobs/printfile_job.rb
 ./app/mailers/application_mailer.rb
 ./app/models/application_record.rb
 ./app/models/concerns/.keep

@@ -1,6 +1,6 @@
 module MockupsHelper
 
-  def run_mockup(is_mockup, params)
+  def run_mockup(params)
     config.logger = Logger.new(STDOUT)
 
     product_id = params[:id]
@@ -25,11 +25,40 @@ module MockupsHelper
       return false
     end
 
-    job = Delayed::Job.enqueue MockupJob.new(current_user, params, mockup, is_mockup)
+    job = Delayed::Job.enqueue MockupJob.new(current_user, params, mockup)
     
     mockup.update({:job_id => job.id})
 
     return true
  
   end
+
+  def make_printfiles(params)
+    config.logger = Logger.new(STDOUT)
+
+    product_id = params[:id]
+    image_id = params['image_id']
+    params['product_id'] = product_id
+
+    product = get_product(product_id)
+
+    printfile = Printfile.new({
+      :printfile_url  => nil,
+      :printful_id => product_id.to_i,
+      :shopify_id  => 0,
+      :job_id      => 0
+    })
+
+    if !printfile.save
+      logger.debug "Failed to save printfile"
+      return false
+    end
+
+    job = Delayed::Job.enqueue PrintfileJob.new(current_user, params, printfile)
+    
+    printfile.update({:job_id => job.id})
+
+    return true
+  end
+
 end
