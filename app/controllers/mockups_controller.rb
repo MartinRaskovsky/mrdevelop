@@ -1,6 +1,7 @@
 require 'json'
 
 include FileNameHelper                                                                                            
+include MockupsHelper
 include PostHelper
 
 class MockupsController < ShopifyApp::AuthenticatedController
@@ -48,34 +49,11 @@ class MockupsController < ShopifyApp::AuthenticatedController
 
   # GET /mockups/generate
   def generate
-    config.logger = Logger.new(STDOUT)
-
-    product_id = params[:id]
-    image_id = params['image_id']
-    params['product_id'] = product_id
-
-    product = get_product(product_id)
-
-    @mockup = Mockup.new({
-      :product_url => product['image'],
-      :image_url   => image_thumb(image_id), 
-      :thumb_url   => nil,
-      :mockup_url  => nil,
-      :printful_id => product_id.to_i,
-      :shopify_id  => 0,
-      :job_id      => 0,
-      :cart        => nil
-    })
-
-    if !@mockup.save                                                                                       
-      logger.debug "Failed to save mockup"
+    if !run_mockup(true, params)
       redirect_to :controller => 'product', :action => 'index', :id => product_id, :image_id => image_id
       return
     end
 
-    @job = Delayed::Job.enqueue MockupJob.new(current_user, params, @mockup)
-    
-    @mockup.update({:job_id => @job.id})
     redirect_to mockups_path, notice: "Mockup creation is in the background"
   end
 
@@ -134,7 +112,7 @@ class MockupsController < ShopifyApp::AuthenticatedController
       return
     end
 
-    cart = get_cart(product)
+    cart = get_cart(product, mockup.id)
 
     mockup.update({:shopify_id => product.id, :cart => cart})  
     redirect_to mockups_url, notice: 'Shopify product was successfully created.'
@@ -173,7 +151,8 @@ class MockupsController < ShopifyApp::AuthenticatedController
     order = ShopifyAPI::Order.new(
       :line_items    => line_items,
       :email         => "martinr6969@gmail.com",
-      :customer      => customer
+      :customer      => customer,
+      :note          => "REF " + mockup.id.to_s
     )
 
     if !order.save
@@ -261,7 +240,7 @@ class MockupsController < ShopifyApp::AuthenticatedController
     return thumb_image_name(large_url)
   end
 
-  def get_cart(product)
+  def get_cart(product, mockup_id)
     carts = ""
     product.variants.each do |variant|
       if carts.length > 0
@@ -274,7 +253,10 @@ class MockupsController < ShopifyApp::AuthenticatedController
       return nil
     end
 
-    cart = "http://la-camiseta-loca.myshopify.com/cart/" + carts
+    args = "checkout[email]=" + current_user.email +
+          "&checkout[shipping_address][first_name]=" + current_user.name +
+          "&note=" + "REF " + mockup_id.to_s
+    cart = "http://la-camiseta-loca.myshopify.com/cart/" + carts + "?" + args
 
     return cart
   end

@@ -70,6 +70,14 @@ ActiveRecord::Schema.define(version: 20171011004408) do
     t.string "cart"
   end
 
+  create_table "product_templates", force: :cascade do |t|
+    t.integer "product_id", limit: 8
+    t.string "product_title"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_product_templates_on_product_id"
+  end
+
   create_table "shops", force: :cascade do |t|
     t.string "shopify_domain", null: false
     t.string "shopify_token", null: false
@@ -100,30 +108,6 @@ ActiveRecord::Schema.define(version: 20171011004408) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["product_id"], name: "index_template_data_on_product_id"
-  end
-
-  create_table "templates", force: :cascade do |t|
-    t.integer "product_id", limit: 8
-    t.string "title"
-    t.string "group"
-    t.integer "width"
-    t.integer "height"
-    t.string "placement"
-    t.string "hash"
-    t.integer "area_width"
-    t.integer "area_height"
-    t.integer "area_x"
-    t.integer "area_y"
-    t.integer "safe_area_width"
-    t.integer "safe_area_height"
-    t.integer "safe_area_x"
-    t.integer "safe_area_y"
-    t.integer "order"
-    t.string "file_background"
-    t.string "file_overlay"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["product_id"], name: "index_templates_on_product_id"
   end
 
   create_table "users", force: :cascade do |t|

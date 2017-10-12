@@ -10,21 +10,26 @@ module ImageHelper
   def generate_image(user, name, x, y, w)
     init("generate_image(" + user.id.to_s + ", " + name + ", " + x.to_s + ", " + y.to_s + ", " + w.to_s + ")")
 
-    # scaleing x,y to target / display 
-    x = (w * x) / 300
-    y = (w * y) / 300
-
     image = MiniMagick::Image.open("http://localhost:3000" + name)
     w_original= image.width.to_f
     h_original= image.height.to_f
 
-    h = (h_original * w) / w_original
+    # scaleing x,y to target / display 
+    if w == 0
+      w = image.width
+      h = image.height
+    else
+      x = (w * x) / 300
+      y = (w * y) / 300
+      h = (h_original * w) / w_original
+    end
 
     sw = w + x
     sh = h + y
-    geometry = sw.to_i.to_s + "x" + sh.to_i.to_s
-
-    image.resize geometry
+    if sw != image.width && sh != image.height
+      geometry = sw.to_i.to_s + "x" + sh.to_i.to_s
+      image.resize geometry
+    end
 
     if x != 0 || y != 0
       geometry = w.to_i.to_s + "x" + h.to_i.to_s + "+" + x.to_s + "+" + y.to_s

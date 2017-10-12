@@ -6,26 +6,32 @@ class MockupJob
   @user
   @params
   @mockup
+  @is_mockup
 
-  def initialize(user, params, mockup)
+  def initialize(user, params, mockup, is_mockup)
     @user = user
     @params = params
     @mockup = mockup
+    @is_mockup = is_mockup
     logger = Logger.new(STDOUT)
   end
 
   def perform
-    generate_mockup(@user, @params)
+    generate_mockup(@user, @params, @is_mockup)
   end
 
   private
  
-  def generate_mockup(user, params)
+  def generate_mockup(user, params, is_mockup)
     logger = Logger.new(STDOUT)
     product_id = params['product_id']
     x = params['xpos_field'].to_i
     y = params['ypos_field'].to_i
-    w = 1000
+    if is_mockup
+      w = 1000
+    else
+      w = 0
+    end
     mockup_url = nil
 
     vars = printfile_variants(product_id)
@@ -54,7 +60,11 @@ class MockupJob
 
     mockups.each do |mockup|
 
-      main_image = mockup['mockup_url'] #put_img(user, mockup['mockup_url'], 0)
+      if is_mockup
+        main_image = mockup['mockup_url']
+      else
+        main_image = put_img(user, mockup['mockup_url'], 0)
+      end
 
       # FIXME, we have only generated one image, we have not generated for others like back/label ...
       mockup_image = MockupImage.new({
@@ -100,14 +110,8 @@ class MockupJob
     end
 
     @mockup.update({
-      #:product_url => product_thumb(user, params['product_id']),
-      #:image_url   => image_thumb(params['image_id']),
       :thumb_url   => generate_thumb(user, mockups[0]['mockup_url']),
-      :mockup_url  => mockup_url,
-      #:job_id      => 0,
-      #:printful_id => params['product_id'].to_i,
-      #:shopify_id  => 0,
-      #:cart        => nil
+      :mockup_url  => mockup_url
     })
 
   end
