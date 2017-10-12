@@ -1,0 +1,2 @@
+class PrintfileGroup < ApplicationRecord
+end

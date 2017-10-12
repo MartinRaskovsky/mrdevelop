@@ -1,0 +1,3 @@
+rails generate model Printfile printfile_url:string printful_id:integer{8}:index shopify_id:integer{8}:index job_id:integer
+rails generate model PrintfileGroup printfile_id:integer{8}:index variant_ids:string placement:string printfile_url:string
+rails generate model PrintfileImage printfile_id:integer{8}:index variant_ids:string image:string title:string
