@@ -2,6 +2,8 @@ require 'json/pure'
 require 'open-uri'
 
 class ProductsController < ApplicationController
+  before_action :check_login,  only: [:index]
+
   def index
     @types = {}
     content = open("https://api.printful.com/products").read
@@ -22,4 +24,13 @@ class ProductsController < ApplicationController
       @products = []
     end
   end
+
+  private
+
+  def check_login                                                                                                    
+    if !current_user
+      redirect_to new_user_session_path
+    end
+  end
+
 end

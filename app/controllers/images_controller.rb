@@ -6,6 +6,7 @@ class ImagesController < ApplicationController
  
   def index
     form = Form.new(params[:form].permit!)
+    ImageUploader.store_id = current_user.id
     @images = Image.order('created_at DESC') if !@images
   end
 
@@ -94,6 +95,7 @@ class ImagesController < ApplicationController
 
   def upload_image
     if has_upload_image
+      ImageUploader.store_id = current_user.id
       @image = Image.new(image_params)
       if @image.save
         redirect_to :controller => 'product', :action => 'index', :id => params["product_id"]

@@ -33,14 +33,20 @@ class MockupsController < ShopifyApp::AuthenticatedController
         job = DelayedJob.find_by_id(job_id)
         if job == nil
           mockup.update({:job_id => 0})
-          render nothing: true, status: 403
+          #render nothing: true, status: 403
+          respond_to do |format|
+            format.js {render inline: "location.reload();" }
+           end
           return
         end
       end
     end
-
+ 
     if all_done
-      render nothing: true, status: 403
+      #render nothing: true, status: 403
+      respond_to do |format|
+        format.js {render inline: "location.reload();" }
+      end
       return
     end
 

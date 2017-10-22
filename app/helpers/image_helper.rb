@@ -1,8 +1,24 @@
 module ImageHelper 
+
+  def local_to_url(local)
+    init("local_to_url(" + local + ")")
+    base = local.sub("public", "")
+    http = ENV["LA_CAMISETA_LOCA"]
+    if !http
+      failed("ENV['LA_CAMISETA_LOCA'] not found")
+      http = "https://cdd4f677.ngrok.io"
+    end
+    url = http + base
+    return url
+  end
+
   def image_details(name)
     init("image_details(" + name + ")")
     base = File.basename(name)
-    image = MiniMagick::Image.open("http://localhost:3000" + name)
+    image = open_image("public" + name)
+    if !image
+      return ""
+    end
     #return raw("<br>" + base + "<br><b>" + image.width.to_s + " x " + image.height.to_s + "</b>")
     return raw("<br><b>" + image.width.to_s + " x " + image.height.to_s + "</b>")
   end
@@ -10,7 +26,10 @@ module ImageHelper
   def generate_image(user, name, x, y, w)
     init("generate_image(" + user.id.to_s + ", " + name + ", " + x.to_s + ", " + y.to_s + ", " + w.to_s + ")")
 
-    image = MiniMagick::Image.open("http://localhost:3000" + name)
+    image = open_image("public" + name)
+    if !image
+      return ""
+    end
     w_original= image.width.to_f
     h_original= image.height.to_f
 
@@ -46,7 +65,10 @@ module ImageHelper
   def scale_to_url_thumb(user, name)
     init("scale_to_url_thumb(" + user.id.to_s + ", " + name + ")")
 
-    image = MiniMagick::Image.open(name)
+    image = open_image(name)
+    if !image
+      return ""
+    end
     w_original= image.width.to_f
     h_original= image.height.to_f
 
@@ -62,7 +84,7 @@ module ImageHelper
     dst = thumb_dir(base)
     image.write dst
 
-    url = thumb_url + base
+    url = get_thumb_url + base
 
     return url
   end
@@ -70,8 +92,23 @@ module ImageHelper
   private
 
   def init(who)
-    logger = Logger.new(STDOUT)                                                                                       
-    logger.debug who
+    @logger = Logger.new(STDOUT)
+    @logger.debug who
+  end
+
+  def failed(msg)
+    #@logger = Logger.new(STDOUT)
+    @logger.debug "Failed with " + msg
+  end
+
+  def open_image(name)
+    begin
+      image = MiniMagick::Image.open(name)
+      return image
+    rescue Errno::ENOENT => e
+      failed("Caught the exception: #{e}")
+      return nil
+    end
   end
 
   def mockup_dir(base)
@@ -88,7 +125,7 @@ module ImageHelper
     return name
   end
 
-  def thumb_url
+  def get_thumb_url
     url = "/thumbs/"
     return url
   end

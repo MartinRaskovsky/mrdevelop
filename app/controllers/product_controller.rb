@@ -3,7 +3,10 @@ include PostHelper
 include TemplateHelper
 
 class ProductController < ApplicationController
+  before_action :check_login,  only: [:index]
+
   def index
+    ImageUploader.store_id = current_user.id
     @images = Image.order('created_at DESC') if !@images
     @design = params['image_id']
     @design_index = 0
@@ -37,4 +40,13 @@ class ProductController < ApplicationController
     end
 
   end
+
+  private
+
+  def check_login                                                                                                    
+    if !current_user
+      redirect_to new_user_session_path
+    end
+  end
+
 end

@@ -32,8 +32,8 @@ class PrintfileJob
 
     details = printfile_details(product_id, vars)
 
-    image_name = generate_image(user, base_image_name(params['image_id']), x, y, w)
-    remote_image = put_img(user,  image_name, 1)
+    local_image = generate_image(user, base_image_name(params['image_id']), x, y, w)
+    remote_image = local_to_url(local_image) #put_img(user,  local_image, 1)
 
     if remote_image == nil
       logger.debug "Failed to create remote image"
@@ -54,7 +54,7 @@ class PrintfileJob
 
     printfiles.each do |printfile|
 
-      main_image = put_img(user, printfile['mockup_url'], 0)
+      main_image = main_image = local_to_url(printfile['mockup_url']) #put_img(user, printfile['mockup_url'], 0)
 
       # FIXME, we have only generated one image, we have not generated for others like back/label ...
       printfile_image = PrintfileImage.new({

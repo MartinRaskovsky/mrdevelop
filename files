@@ -49,6 +49,9 @@
 ./app/models/mockup.rb
 ./app/models/mockup_group.rb
 ./app/models/mockup_image.rb
+./app/models/printfile.rb
+./app/models/printfile_group.rb
+./app/models/printfile_image.rb
 ./app/models/product_template.rb
 ./app/models/shop.rb
 ./app/models/template_datum.rb
@@ -120,6 +123,7 @@
 ./config/secrets.yml
 ./config/spring.rb
 ./config.ru
+./devtime.stamp
 ./Gemfile
 ./Gemfile.lock
 ./Guardfile
@@ -128,6 +132,7 @@
 ./package.json
 ./Rakefile
 ./README
+./time.stamp
 ./vendor/.keep
 ./vendor/assets/javascripts/.keep
 ./vendor/assets/stylesheets/.keep

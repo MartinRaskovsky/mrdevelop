@@ -32,8 +32,8 @@ class MockupJob
 
     details = printfile_details(product_id, vars)
 
-    image_name = generate_image(user, base_image_name(params['image_id']), x, y, w)
-    remote_image = put_img(user,  image_name, 1)
+    local_image = generate_image(user, base_image_name(params['image_id']), x, y, w)
+    remote_image = local_to_url(local_image) #put_img(user,  local_image, 1)
 
     if remote_image == nil
       logger.debug "Failed to create remote image"
@@ -181,14 +181,5 @@ class MockupJob
   def generate_thumb(user, mockup_url)
     return scale_to_url_thumb(user, mockup_url);
   end
-
-  #def product_thumb(user, product_id)
-  #  product = get_product(product_id)
-  #  return scale_to_url_thumb(user, product['image']);
-  #end
-
-  #def image_thumb(large_url)
-  #  return thumb_image_name(large_url)
-  #end
 
 end
