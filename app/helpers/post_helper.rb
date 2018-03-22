@@ -98,72 +98,135 @@ module PostHelper
     return result
   end
 
-  def post_mockup(product_id, details)
-    init("post_mockup(" + product_id + ", " + details.to_s + ")")
+  # OBSOLETE, image_url is now a hash !
+ def post_mockup(product_id, details)
+    init("post_mockup(" + product_id + ", " + details.to_json + ")")
+    # ACTUALLY ONLY THE FIRST ONE IS PROCESSED, LOOK AT THE EARLY return
+    details.each do |detail|
+      placements = []
+      detail['placements'].each do |placement|
+        placements << { placement[0] => nil }
+      end
+      return _post_mockup(product_id, detail['variants'], placements, detail['printfile']["image_url"])
+    end
+  end
+
+  def _post_mockup(product_id, variants, placements, image_url)
+    init("_post_mockup(" + product_id.to_s + ", " + variants.to_json + ", " + placements.to_json + ", " + image_url.to_s + ")")
 
     url = "https://api.printful.com/mockup-generator/create-task/" + product_id
 
-    # TEMPORARY process each request sequentially
-    # ACTUALLY ONLY THE FIRST ONE IS PROCESSED, LOOK AT THE EARLY return
-    details.each do |detail|
-      text = []
-      text << '{'
-      text << '    "variant_ids": ' + detail['variants'].to_s + ','
-      text << '    "format":"jpg",'
-      text << '    "files":['
-      done = false
-      detail['placements'].each.with_index do |placement, i|
-        if !placement[0].start_with?("label")
-          if done
-            text << ','
-          end
-          done = true
-          text << '    {'
-          text << '      "placement": "' + placement[0] + '",'
-          text << '      "image_url": "' + detail['printfile']["image_url"]  + '"'
-          text << '    }'
+    text = []
+    text << '{'
+    text << '    "variant_ids": ' + variants.to_s + ','
+    text << '    "format":"jpg",'
+    text << '    "files":['
+    done = false
+    placements.each do |placement, value|
+      if !placement.start_with?("label")
+        if done
+          text << ','
         end
+        done = true
+        text << '    {'
+        text << '      "placement": "' + placement + '",'
+        text << '      "image_url": "' + image_url[placement]  + '"'
+        text << '    }'
       end
-      text << '  ]'
-      text << '}'
-
-      result = post_json(url, text.join, ENV["EPRINTFUL_KEY"])
-      if !result
-        return nil
-      end
-
-      task_key = result['task_key']
-      status = result['status']
-      if status != "pending"
-        failed("Unexpected status: " + status)
-        return nil
-      end
-
-      url = "http://api.printful.com/mockup-generator/task?task_key=" + task_key.to_s
-
-      while status == "pending"
-        message("Sleeping 3 sec ...")
-        sleep(3);
-        result = http_get(url, ENV["PRINTFUL_KEY"])
-        if result
-          status = result['status']
-        else
-          failed("Failed to GET, trying again")
-        end
-      end
-
-      if status != "completed"
-        failed("Unexpected status " + status)
-        return nil
-      end
-      
-      mockups = result['mockups'] 
-      if mockups == nil
-        failed("Failed to GET mockups")
-      end
-
-      return mockups
     end
+    text << '  ]'
+    text << '}'
+
+    result = post_json(url, text.join, ENV["EPRINTFUL_KEY"])
+    if !result
+      return nil
+    end
+
+    task_key = result['task_key']
+    status = result['status']
+    if status != "pending"
+      failed("Unexpected status: " + status)
+      return nil
+    end
+
+    url = "http://api.printful.com/mockup-generator/task?task_key=" + task_key.to_s
+
+    tries = 0
+    while status == "pending"
+      tries = tries + 1
+      if tries % 20 == 0
+        puts "Wating for printful to respond to mockup creation"
+      end
+      message("Sleeping 10 sec ...")
+      sleep(10);
+      result = http_get(url, ENV["PRINTFUL_KEY"])
+      if result
+        status = result['status']
+      else
+        failed("Failed to GET, trying again")
+      end
+    end
+
+    if status != "completed"
+      failed("Unexpected status " + status)
+      return nil
+    end
+    
+    mockups = result['mockups'] 
+    if mockups == nil
+      failed("Failed to GET mockups")
+    end
+
+    return mockups
+  end
+
+  def post_sync(shopify_variant_id, text)
+    init("post_sync(" + shopify_variant_id.to_s + ", " + text.join.to_json + ")")
+
+    url = "https://api.printful.com/sync/variant/@" + shopify_variant_id.to_s
+    result = post_json(url, text.join, ENV["EPRINTFUL_KEY"])
+    if !result
+      return nil
+    end
+
+   message("post_sync = " + result.to_json)
+   return result
+  end
+
+  def find_sync_variant(shopify_product_id, shopify_variant_id)
+    result = nil
+    if true
+      url = "https://api.printful.com/sync/variant/@" + shopify_variant_id.to_s
+      result = http_get(url, ENV["PRINTFUL_KEY"])
+    else
+
+      offset = 0
+      index = 0
+      while true
+        puts "trying with offet = " + offset.to_s
+        url = "https://api.printful.com/sync/products"
+        result = http_get(url + "?offset=" + offset.to_s, ENV["PRINTFUL_KEY"])
+        if !result || result.length==0
+          puts "not found"
+          return nil
+        end
+    
+        result.each do |item|
+          puts index.to_s + " " + shopify_product_id.to_s + " v/s " + item['external_id'].to_s
+          index = index + 1
+          if item['external_id'].to_i == shopify_product_id
+            result = item
+            message("find_sync_variant=" + result)
+            return result
+          end
+          puts item.to_s
+        end
+  
+        offset = offset + result.length
+      end
+    end
+
+    return result
   end
 
   private
@@ -186,7 +249,7 @@ module PostHelper
   def validate_content(content)
     case content
     when Net::HTTPSuccess then
-      puts "Success"
+      message("Success")
     when Net::HTTPNoContent then
       puts "No Content"
       return nil
@@ -302,6 +365,43 @@ module PostHelper
     end
 
     return  validate_result(content)
+  end
+
+  def http_delete(url, auth_key)
+    if auth_key
+      init("http_delete(" + url + ", " + auth_key + ")")
+    else
+      init("http_delete(" + url + ")")
+    end
+
+    uri = URI.parse(url)
+
+    # Create the HTTP objects
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = (uri.scheme == 'https')
+
+    request = Net::HTTP::Delete.new(uri)
+    request['Authorization'] = "Basic " + Base64::encode64(auth_key) if auth_key
+    request.body = ""
+
+    # Send the request
+    content = safe_request(http, request)
+    content = validate_content(content)
+
+    if !content
+      return nil
+    end
+
+    return  validate_result(content)
+  end
+
+  def printfile_delete_product(product_id)
+    init("printfile_delete_product(" + product_id + ")")
+
+    # unauthorised ? what user/password should I use here ?
+    url = "https://la-camiseta-loca.myshopify.com/admin/products/" + product_id + ".json"
+    result = http_delete(url, ENV["PRINTFUL_KEY"])                                          
+    return result
   end
 
   def post_json(url, text, auth_key)

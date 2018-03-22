@@ -119,6 +119,7 @@ class MockupsController < ShopifyApp::AuthenticatedController
     end
 
     if !product.save
+      logger.debug product.to_json;
       redirect_to mockups_url, notice: 'Failed to save product.'
       return
     end
