@@ -101,4 +101,4 @@ gem 'binding_of_caller'
 
 gem 'delayed_job_active_record'
 
-gem 'loofah', '~> 2.2.1'
+gem 'loofah', '~> 2.19.1'
